@@ -53,7 +53,7 @@ namespace BadmintonCourtAutoBooker
             this.monitorBaseOnBookingSettingsCheckBox = new System.Windows.Forms.CheckBox();
             this.timeUnduplicatedCheckBox = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.monitorCheckBox = new System.Windows.Forms.CheckBox();
+            this.useMonitorCheckBox = new System.Windows.Forms.CheckBox();
             this.intervalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.label8 = new System.Windows.Forms.Label();
             this.untilDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -303,7 +303,7 @@ namespace BadmintonCourtAutoBooker
             this.groupBox3.Controls.Add(this.monitorBaseOnBookingSettingsCheckBox);
             this.groupBox3.Controls.Add(this.timeUnduplicatedCheckBox);
             this.groupBox3.Controls.Add(this.label9);
-            this.groupBox3.Controls.Add(this.monitorCheckBox);
+            this.groupBox3.Controls.Add(this.useMonitorCheckBox);
             this.groupBox3.Controls.Add(this.intervalDateTimePicker);
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.untilDateTimePicker);
@@ -356,17 +356,17 @@ namespace BadmintonCourtAutoBooker
             this.label9.TabIndex = 5;
             this.label9.Text = "Mode:";
             // 
-            // monitorCheckBox
+            // useMonitorCheckBox
             // 
-            this.monitorCheckBox.AutoSize = true;
-            this.monitorCheckBox.Location = new System.Drawing.Point(4, 20);
-            this.monitorCheckBox.Margin = new System.Windows.Forms.Padding(2);
-            this.monitorCheckBox.Name = "monitorCheckBox";
-            this.monitorCheckBox.Size = new System.Drawing.Size(91, 19);
-            this.monitorCheckBox.TabIndex = 0;
-            this.monitorCheckBox.Text = "Use monitor";
-            this.monitorCheckBox.UseVisualStyleBackColor = true;
-            this.monitorCheckBox.CheckedChanged += new System.EventHandler(this.monitorCheckBox_CheckedChanged);
+            this.useMonitorCheckBox.AutoSize = true;
+            this.useMonitorCheckBox.Location = new System.Drawing.Point(4, 20);
+            this.useMonitorCheckBox.Margin = new System.Windows.Forms.Padding(2);
+            this.useMonitorCheckBox.Name = "useMonitorCheckBox";
+            this.useMonitorCheckBox.Size = new System.Drawing.Size(91, 19);
+            this.useMonitorCheckBox.TabIndex = 0;
+            this.useMonitorCheckBox.Text = "Use monitor";
+            this.useMonitorCheckBox.UseVisualStyleBackColor = true;
+            this.useMonitorCheckBox.CheckedChanged += new System.EventHandler(this.monitorCheckBox_CheckedChanged);
             // 
             // intervalDateTimePicker
             // 
@@ -696,7 +696,7 @@ namespace BadmintonCourtAutoBooker
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.ListView logListView;
-        private System.Windows.Forms.CheckBox monitorCheckBox;
+        private System.Windows.Forms.CheckBox useMonitorCheckBox;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.Button stopButton;
         private System.Windows.Forms.Button startButton;

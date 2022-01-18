@@ -144,9 +144,9 @@ namespace BadmintonCourtAutoBooker
 
         public static void SetItemsChecked(this CheckedListBox checkedListBox, string checkedIndexsStr)
         {
-            if (!string.IsNullOrEmpty(checkedIndexsStr) && checkedIndexsStr.Contains(','))
+            if (!string.IsNullOrEmpty(checkedIndexsStr))
             {
-                foreach (string indexStr in checkedIndexsStr.Split(','))
+                foreach (string indexStr in checkedIndexsStr.Contains(',') ? checkedIndexsStr.Split(',') : new string[] { checkedIndexsStr })
                 {
                     if (int.TryParse(indexStr, out int index))
                     {

@@ -19,10 +19,10 @@ namespace BadmintonCourtAutoBooker
         /* Timer for waiting to book and monitor */
         private readonly Timer bookingTimer = new Timer() { Interval = 500, Enabled = false };
         /* BackgroundWorker for booking */
-        private readonly List<BackgroundWorkerPair> backgroundWorkerPairs = new List<BackgroundWorkerPair>();
-        private readonly System.Threading.Mutex mutex = new System.Threading.Mutex();
+        private List<BackgroundWorkerPair> backgroundWorkerPairs;
+        private List<int> courtBookingRecord;
+        private System.Threading.Mutex mutex;
 
-        private readonly List<int> courtBookingRecord = new List<int>();
         private readonly List<ToolStripStatusLabel> toolStripStatusLabels = new List<ToolStripStatusLabel>();
 
         private SportCenter currentSportCenter;
@@ -40,6 +40,8 @@ namespace BadmintonCourtAutoBooker
         private Size checkButtonImageSize = new Size(24, 24);
         private Size toolStripMenuItemImageSize;
         private Size toolStripStatusLabelImageSize;
+
+        private delegate void VoidDelegate();
 
         public MainForm()
         {
@@ -299,7 +301,7 @@ namespace BadmintonCourtAutoBooker
                 timeUnduplicatedCheckBox.Enabled =
                 monitorBaseOnBookingSettingsCheckBox.Enabled =
                 monitorBySingleThreadCheckBox.Enabled =
-                monitorCheckBox.Checked;
+                useMonitorCheckBox.Checked;
 
         #endregion
 
@@ -435,6 +437,10 @@ namespace BadmintonCourtAutoBooker
                 courtCodes.Add(currentSportCenter.Courts[courtCheckedListBox.CheckedItems[i].ToString()]);
             }
 
+            /* Initial variables */
+            backgroundWorkerPairs = new List<BackgroundWorkerPair>();
+            courtBookingRecord = new List<int>();
+            mutex = new System.Threading.Mutex();
             int bgWorkerId = 1;
             if (bookingByMultiThreadCheckBox.Checked)
             {
@@ -457,6 +463,7 @@ namespace BadmintonCourtAutoBooker
                             BookingCourtCodes = new List<int>() { courtCode },
                             BookingWithoutCheckOpenState = withoutCheckOpenStateCheckBox.Checked,
                             /* Monitor settings */
+                            UseMonitor = useMonitorCheckBox.Checked,
                             MonitorTimeCodes = timeCodes,
                             MonitorCourtCodes = courtCodes,
                             MonitorDateTime = untilDateTimePicker.Value,
@@ -496,6 +503,7 @@ namespace BadmintonCourtAutoBooker
                     BookingCourtCodes = courtCodes,
                     BookingWithoutCheckOpenState = withoutCheckOpenStateCheckBox.Checked,
                     /* Monitor settings */
+                    UseMonitor = useMonitorCheckBox.Checked,
                     MonitorTimeCodes = timeCodes,
                     MonitorCourtCodes = courtCodes,
                     MonitorDateTime = untilDateTimePicker.Value,
@@ -634,10 +642,24 @@ namespace BadmintonCourtAutoBooker
              *     only one BackgroungWorker can set the finished flag in the
              *     same time.
              */
-            if ((args.MonitorBySingleThread && mutex.WaitOne()) ||
-                !args.MonitorBySingleThread)
+            if (args.UseMonitor)
             {
-                backgroundWorker_Monitor(sender, e, bookingBot);
+                if ((args.MonitorBySingleThread && mutex.WaitOne()) ||
+                    !args.MonitorBySingleThread)
+                {
+                    backgroundWorker_Monitor(sender, e, bookingBot);
+                }
+            }
+            else
+            {
+                mutex.WaitOne();
+                backgroundWorkerPairs.First(backgroundWorkerPair => backgroundWorkerPair.BackgroundWorker == (BackgroundWorker)sender).IsFinished = true;
+                if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
+                {
+                    Log($"Finished to auto-book courts", logType: LogType.Okay);
+                    this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
+                }
+                mutex.ReleaseMutex();
             }
         }
 
@@ -760,12 +782,21 @@ namespace BadmintonCourtAutoBooker
 
                 if (DateTime.Now >= args.MonitorDateTime)
                 {
+
                     Log($"Finished to monitor courts", logType: LogType.Okay, id: args.Id);
                     break;
                 }
 
                 backgroundWorker_Sleep(sender, e, args.MonitorIntervalSeconds * 1000);
             }
+
+            mutex.WaitOne();
+            if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
+            {
+                Log($"Finished to auto-book courts", logType: LogType.Okay);
+                this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
+            }
+            mutex.ReleaseMutex();
         }
 
         private void backgroundWorker_Sleep(object sender, DoWorkEventArgs e, int millisecondsTimeout)
@@ -801,7 +832,7 @@ namespace BadmintonCourtAutoBooker
                 {
                     if (backgroundWorkerPairs[i].BackgroundWorker.IsBusy)
                     {
-                        Log($"Cancelling BackgroundWorker", logType: LogType.Info, id: i);
+                        Log($"Cancelling BackgroundWorker", logType: LogType.Info, id: backgroundWorkerPairs[i].BackgroundWrokerArguments.Id);
                         backgroundWorkerPairs[i].BackgroundWorker.CancelAsync();
                     }
                 }
@@ -814,7 +845,7 @@ namespace BadmintonCourtAutoBooker
                         Log($"All BackgroundWorker is already be cancelled", logType: LogType.Info);
                         for (int i = 0; i < backgroundWorkerPairs.Count; i++)
                         {
-                            Log($"Disposing BackgroundWorker", logType: LogType.Info, id: i);
+                            Log($"Disposing BackgroundWorker", logType: LogType.Info, id: backgroundWorkerPairs[i].BackgroundWrokerArguments.Id);
                             backgroundWorkerPairs[i].BackgroundWorker.Dispose();
                             backgroundWorkerPairs[i].BackgroundWrokerArguments = null;
                         }
@@ -826,6 +857,9 @@ namespace BadmintonCourtAutoBooker
                 backgroundWorkerPairs.Clear();
             }
 
+            backgroundWorkerPairs = null;
+            courtBookingRecord = null;
+            mutex.Close();
             SetFormControl(true);
         }
 
@@ -841,6 +875,7 @@ namespace BadmintonCourtAutoBooker
                     }));
                 }
                 catch (InvalidAsynchronousStateException) { }
+                catch (ObjectDisposedException) { }
             }
             else
             {
@@ -946,7 +981,7 @@ namespace BadmintonCourtAutoBooker
             iniManager.WriteIniFile("Booking", "Courts", string.Join(',', courtCheckedListBox.GetCheckedItemIndexs()));
             iniManager.WriteIniFile("Booking", "WithoutCheckOpenState", withoutCheckOpenStateCheckBox.Checked);
             /* Monitor */
-            iniManager.WriteIniFile("Monitor", "UseMonitor", monitorCheckBox.Checked);
+            iniManager.WriteIniFile("Monitor", "UseMonitor", useMonitorCheckBox.Checked);
             iniManager.WriteIniFile("Monitor", "TimeUnduplicated", timeUnduplicatedCheckBox.Checked);
             iniManager.WriteIniFile("Monitor", "BasedOnBookingSettings", monitorBaseOnBookingSettingsCheckBox.Checked);
             iniManager.WriteIniFile("Monitor", "BySingleThread", monitorBySingleThreadCheckBox.Checked);
@@ -971,7 +1006,7 @@ namespace BadmintonCourtAutoBooker
             courtCheckedListBox.SetItemsChecked(iniManager.ReadIniFile("Booking", "Courts", ""));
             withoutCheckOpenStateCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Booking", "WithoutCheckOpenState", "true"));
             /* Monitor */
-            monitorCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "UseMonitor", "false"));
+            useMonitorCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "UseMonitor", "false"));
             timeUnduplicatedCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "TimeUnduplicated", "true"));
             monitorBaseOnBookingSettingsCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BasedOnBookingSettings", "true"));
             monitorBySingleThreadCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BySingleThread", "true"));
