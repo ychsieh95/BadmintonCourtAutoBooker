@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
@@ -269,6 +270,232 @@ namespace BadmintonCourtAutoBooker
                     }
 
                     return restClient.Get(restRequest).Content.Contains("預約成功");
+                }
+            }
+
+            return false;
+        }
+
+        public List<OrderListItem> GetOrderList(DateTime beginDate, DateTime endDate, string orderId = "")
+        {
+            List<OrderListItem> orders = new List<OrderListItem>();
+            for (int i = 1; ; i++)
+            {
+                RestRequest restRequest = new RestRequest(moduleName);
+                restRequest.AddQueryParameter("module", "member");
+                restRequest.AddQueryParameter("files", "orderx_mt");
+                restRequest.AddQueryParameter("F2", "10");          // item count of list per page
+                restRequest.AddQueryParameter("F3", i.ToString());  // page number
+                restRequest.AddQueryParameter("A", "");
+                restRequest.AddQueryParameter("B", orderId);
+                restRequest.AddQueryParameter("C", beginDate.ToString("yyyy/MM/dd"));
+                restRequest.AddQueryParameter("D", endDate.ToString("yyyy/MM/dd"));
+
+                string respContent = restClient.Get(restRequest).Content.Replace("\r", "").Replace("\n", "");
+                HtmlDocument htmlDocument = new HtmlDocument();
+                htmlDocument.LoadHtml(respContent);
+
+                HtmlNode tableNode = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='subform_List']/table[1]/tr[2]/td[1]/table[1]/tr[2]/td[1]/table[1]");
+                if (tableNode == null && orders.Count == 0)
+                {
+                    return null;
+                }
+                else
+                {
+                    foreach (HtmlNode trNode in tableNode.SelectNodes("./tr"))
+                    {
+                        if (new Regex(@"^\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Matches(trNode.SelectSingleNode("./td[1]").InnerText).Count == 0)
+                        {
+                            continue;
+                        }
+
+                        OrderListItem order = new OrderListItem()
+                        {
+                            Date = DateTime.Parse(trNode.SelectSingleNode("./td[1]").InnerText),
+                            OrderId = trNode.SelectSingleNode("./td[2]").InnerText,
+                            ReceiptId = trNode.SelectSingleNode("./td[3]").InnerText,
+                            ProductName = trNode.SelectSingleNode("./td[4]").InnerText,
+                            Price = decimal.Parse(trNode.SelectSingleNode("./td[5]").InnerText),
+                            OrderDateStr = trNode.SelectSingleNode("./td[6]").InnerText,
+                            OrderTimeStr = trNode.SelectSingleNode("./td[7]").InnerText,
+                            Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), trNode.SelectSingleNode("./td[8]").InnerText),
+                            Remark = trNode.SelectSingleNode("./td[9]").InnerText,
+                            CourtName = ""
+                        };
+
+                        if (!string.IsNullOrEmpty(order.ReceiptId))
+                        {
+                            Match match = new Regex(@"^(\d+)([A-Z]{2}\d+)$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.ReceiptId);
+                            order.ReceiptId = $"{match.Groups[1].Value};{match.Groups[2].Value}";
+                        }
+
+                        if (!string.IsNullOrEmpty(order.OrderDateStr))
+                        {
+                            Match match = new Regex(@"^\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderDateStr);
+                            if (match.Success)
+                            {
+                                order.IsOrderDate = true;
+                                order.OrderDate = DateTime.Parse(match.Groups[0].Value);
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(order.OrderTimeStr))
+                        {
+                            Match match = new Regex(@"^\d+$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderTimeStr);
+                            if (match.Success)
+                            {
+                                order.IsOrderTime = true;
+                                order.OrderTime = int.Parse(match.Groups[0].Value);
+                            }
+                        }
+
+                        HtmlNode spanNode = trNode.SelectSingleNode("./td[10]").SelectSingleNode("./span");
+                        if (spanNode != null)
+                        {
+                            HtmlNodeCollection imgNodes = spanNode.SelectNodes("./img");
+                            foreach (HtmlNode imgNode in imgNodes)
+                            {
+                                string onclickStr = imgNode.Attributes["onclick"].Value;
+                                Match match = new Regex(@"^.+\'.+\?(.+)\.*'$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(onclickStr);
+                                if (match.Success)
+                                {
+                                    switch (imgNode.Attributes["alt"].Value)
+                                    {
+                                        case "觀看":
+                                            order.ViewOnClickDict = new Dictionary<string, string>();
+                                            foreach (string str in match.Groups[1].Value.Split('&'))
+                                            {
+                                                string[] args = str.Split('=');
+                                                order.ViewOnClickDict.Add(args[0], args[1]);
+                                            }
+                                            break;
+                                        case "取消":
+                                            order.CancelOnClickDict = new Dictionary<string, string>();
+                                            foreach (string str in match.Groups[1].Value.Split('&'))
+                                            {
+                                                string[] args = str.Split('=');
+                                                order.CancelOnClickDict.Add(args[0], args[1]);
+                                            }
+                                            break;
+                                    }
+                                }
+                            }
+                        }
+                        orders.Add(order);
+                    }
+                }
+
+                string pageHolderStr = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_CPage1']").InnerText;
+                Match matchPage = new Regex(@"^.+共.*(\d+).*頁.*$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(pageHolderStr);
+                if (matchPage.Success)
+                {
+                    int endPageNumber = int.Parse(matchPage.Groups[1].Value);
+                    if (i >= endPageNumber)
+                    {
+                        return orders;
+                    }
+                }
+                else
+                {
+                    throw new NullReferenceException();
+                }
+            }
+        }
+
+        public Order GetOrder(string id, string orderId)
+        {
+            RestRequest restRequest = new RestRequest(moduleName);
+            restRequest.AddQueryParameter("module", "member");
+            restRequest.AddQueryParameter("files", "orderx_mt");
+            restRequest.AddQueryParameter("F2", "");
+            restRequest.AddQueryParameter("F3", "");
+            restRequest.AddQueryParameter("B", "");
+            restRequest.AddQueryParameter("C", "");
+            restRequest.AddQueryParameter("D", "");
+            restRequest.AddQueryParameter("tFlag", "1"); // { 1: view, 2: cancel }
+            restRequest.AddQueryParameter("ID", id);
+            restRequest.AddQueryParameter("KIND", "1");
+            restRequest.AddQueryParameter("RNO", orderId);
+
+            string respContent = restClient.Get(restRequest).Content.Replace("\r", "").Replace("\n", "");
+            HtmlDocument htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(respContent);
+
+            HtmlNode tableNode = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_PanelShow2']/table[1]/tr[2]/td[1]/table[1]");
+            if (tableNode == null)
+            {
+                return null;
+            }
+            else
+            {
+                Order order = new Order()
+                {
+                    Date = DateTime.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Date']").InnerText),
+                    OrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_No']").InnerText,
+                    SalesOrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_SaleNo']").InnerText,
+                    ReceiptId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Invoice']").InnerText,
+                    MemberName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MName']").InnerText,
+                    MemberId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MIDNo']").InnerText,
+                    ProductName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_PName']").InnerText,
+                    Price = decimal.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Price']").InnerText),
+                    OrderDateStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_RDate']").InnerText,
+                    OrderTimeStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Time']").InnerText,
+                    DayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText),
+                    DayOfWeekStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText,
+                    Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Fee']").InnerText),
+                    CourtName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Location']").InnerText,
+                    PhoneNumber = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Tel']").InnerText,
+                    Lessee = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_People']").InnerText
+                };
+
+                if (!string.IsNullOrEmpty(order.OrderDateStr))
+                {
+                    Match match = new Regex(@"^\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderDateStr);
+                    if (match.Success)
+                    {
+                        order.IsOrderDate = true;
+                        order.OrderDate = DateTime.Parse(match.Groups[0].Value);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(order.OrderTimeStr))
+                {
+                    Match match = new Regex(@"^(\d{2}).+(\d{2})$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderTimeStr);
+                    if (match.Success &&
+                        int.TryParse(match.Groups[1].Value, out int beginTime) && ($"{beginTime}~{beginTime + 1}" == order.OrderTimeStr))
+                    {
+                        order.IsOrderTime = true;
+                        order.OrderTime = int.Parse(match.Groups[1].Value);
+                    }
+                }
+
+                return order;
+            }
+        }
+
+        public bool CancelOrder(string id, string orderId)
+        {
+            RestRequest restRequest = new RestRequest(moduleName);
+            restRequest.AddQueryParameter("module", "member");
+            restRequest.AddQueryParameter("files", "orderx_mt");
+            restRequest.AddQueryParameter("F2", "");
+            restRequest.AddQueryParameter("F3", "");
+            restRequest.AddQueryParameter("B", "");
+            restRequest.AddQueryParameter("C", "");
+            restRequest.AddQueryParameter("D", "");
+            restRequest.AddQueryParameter("tFlag", "2"); // { 1: view, 2: cancel }
+            restRequest.AddQueryParameter("ID", id);
+            restRequest.AddQueryParameter("KIND", "1");
+            restRequest.AddQueryParameter("RNO", orderId);
+
+            string respContent = restClient.Get(restRequest).Content.Replace("\r", "").Replace("\n", "");
+            Match match = new Regex(@"<script>(.+?)<\/script>", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(respContent);
+            if (match.Success)
+            {
+                match = new Regex(@"alert\(\'(.+)\'\);", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(match.Groups[1].Value);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value.Contains("取消成功");
                 }
             }
 

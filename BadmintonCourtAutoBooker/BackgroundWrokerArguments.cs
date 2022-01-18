@@ -47,6 +47,14 @@ namespace BadmintonCourtAutoBooker
 
         #endregion
 
+        #region Notify settings
+
+        public bool UseTelegramToNotify { get; set; }
+
+        public TelegramBot TelegramBot { get; set; }
+
+        #endregion
+
         public int Id { get; set; }
     }
 }

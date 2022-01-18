@@ -36,11 +36,11 @@ namespace BadmintonCourtAutoBooker
             this.usernameTextBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.courtSelectCheckBox = new System.Windows.Forms.CheckBox();
+            this.timeSelectCheckBox = new System.Windows.Forms.CheckBox();
             this.withoutCheckOpenStateCheckBox = new System.Windows.Forms.CheckBox();
             this.bookingByMultiThreadCheckBox = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.courtSelectButton = new System.Windows.Forms.Button();
-            this.timeSelectButton = new System.Windows.Forms.Button();
             this.sportCenterComboBox = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.courtCheckedListBox = new System.Windows.Forms.CheckedListBox();
@@ -58,7 +58,7 @@ namespace BadmintonCourtAutoBooker
             this.label8 = new System.Windows.Forms.Label();
             this.untilDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.label7 = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.logListView = new System.Windows.Forms.ListView();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.stopButton = new System.Windows.Forms.Button();
@@ -67,18 +67,23 @@ namespace BadmintonCourtAutoBooker
             this.versionToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.sendTestMessageButton = new System.Windows.Forms.Button();
             this.channelIdTextBox = new System.Windows.Forms.TextBox();
             this.botTokenTextBox = new System.Windows.Forms.TextBox();
-            this.telegramNotifyCheckBox = new System.Windows.Forms.CheckBox();
+            this.useTelegramToNotifyCheckBox = new System.Windows.Forms.CheckBox();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.settingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.orderListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            this.groupBox4.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.statusStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -86,8 +91,9 @@ namespace BadmintonCourtAutoBooker
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.flowLayoutPanel1.SuspendLayout();
-            this.groupBox6.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -155,11 +161,11 @@ namespace BadmintonCourtAutoBooker
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.courtSelectCheckBox);
+            this.groupBox2.Controls.Add(this.timeSelectCheckBox);
             this.groupBox2.Controls.Add(this.withoutCheckOpenStateCheckBox);
             this.groupBox2.Controls.Add(this.bookingByMultiThreadCheckBox);
             this.groupBox2.Controls.Add(this.label10);
-            this.groupBox2.Controls.Add(this.courtSelectButton);
-            this.groupBox2.Controls.Add(this.timeSelectButton);
             this.groupBox2.Controls.Add(this.sportCenterComboBox);
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.courtCheckedListBox);
@@ -171,15 +177,35 @@ namespace BadmintonCourtAutoBooker
             this.groupBox2.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox2.Size = new System.Drawing.Size(322, 248);
+            this.groupBox2.Size = new System.Drawing.Size(322, 242);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Booking Settings";
             // 
+            // courtSelectCheckBox
+            // 
+            this.courtSelectCheckBox.AutoSize = true;
+            this.courtSelectCheckBox.Location = new System.Drawing.Point(302, 173);
+            this.courtSelectCheckBox.Name = "courtSelectCheckBox";
+            this.courtSelectCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.courtSelectCheckBox.TabIndex = 8;
+            this.courtSelectCheckBox.UseVisualStyleBackColor = true;
+            this.courtSelectCheckBox.CheckedChanged += new System.EventHandler(this.courtSelectCheckBox_CheckedChanged);
+            // 
+            // timeSelectCheckBox
+            // 
+            this.timeSelectCheckBox.AutoSize = true;
+            this.timeSelectCheckBox.Location = new System.Drawing.Point(179, 173);
+            this.timeSelectCheckBox.Name = "timeSelectCheckBox";
+            this.timeSelectCheckBox.Size = new System.Drawing.Size(15, 14);
+            this.timeSelectCheckBox.TabIndex = 7;
+            this.timeSelectCheckBox.UseVisualStyleBackColor = true;
+            this.timeSelectCheckBox.CheckedChanged += new System.EventHandler(this.timeSelectCheckBox_CheckedChanged);
+            // 
             // withoutCheckOpenStateCheckBox
             // 
             this.withoutCheckOpenStateCheckBox.AutoSize = true;
-            this.withoutCheckOpenStateCheckBox.Location = new System.Drawing.Point(74, 199);
+            this.withoutCheckOpenStateCheckBox.Location = new System.Drawing.Point(74, 193);
             this.withoutCheckOpenStateCheckBox.Name = "withoutCheckOpenStateCheckBox";
             this.withoutCheckOpenStateCheckBox.Size = new System.Drawing.Size(161, 19);
             this.withoutCheckOpenStateCheckBox.TabIndex = 10;
@@ -189,7 +215,7 @@ namespace BadmintonCourtAutoBooker
             // bookingByMultiThreadCheckBox
             // 
             this.bookingByMultiThreadCheckBox.AutoSize = true;
-            this.bookingByMultiThreadCheckBox.Location = new System.Drawing.Point(74, 224);
+            this.bookingByMultiThreadCheckBox.Location = new System.Drawing.Point(74, 218);
             this.bookingByMultiThreadCheckBox.Name = "bookingByMultiThreadCheckBox";
             this.bookingByMultiThreadCheckBox.Size = new System.Drawing.Size(161, 19);
             this.bookingByMultiThreadCheckBox.TabIndex = 11;
@@ -199,29 +225,11 @@ namespace BadmintonCourtAutoBooker
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(5, 200);
+            this.label10.Location = new System.Drawing.Point(5, 194);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(41, 15);
             this.label10.TabIndex = 9;
             this.label10.Text = "Mode:";
-            // 
-            // courtSelectButton
-            // 
-            this.courtSelectButton.Location = new System.Drawing.Point(298, 173);
-            this.courtSelectButton.Name = "courtSelectButton";
-            this.courtSelectButton.Size = new System.Drawing.Size(20, 20);
-            this.courtSelectButton.TabIndex = 8;
-            this.courtSelectButton.UseVisualStyleBackColor = true;
-            this.courtSelectButton.Click += new System.EventHandler(this.courtSelectButton_Click);
-            // 
-            // timeSelectButton
-            // 
-            this.timeSelectButton.Location = new System.Drawing.Point(174, 173);
-            this.timeSelectButton.Name = "timeSelectButton";
-            this.timeSelectButton.Size = new System.Drawing.Size(20, 20);
-            this.timeSelectButton.TabIndex = 7;
-            this.timeSelectButton.UseVisualStyleBackColor = true;
-            this.timeSelectButton.Click += new System.EventHandler(this.timeSelectButton_Click);
             // 
             // sportCenterComboBox
             // 
@@ -251,7 +259,6 @@ namespace BadmintonCourtAutoBooker
             this.courtCheckedListBox.Name = "courtCheckedListBox";
             this.courtCheckedListBox.Size = new System.Drawing.Size(120, 94);
             this.courtCheckedListBox.TabIndex = 6;
-            this.courtCheckedListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.courtCheckedListBox_ItemCheck);
             // 
             // timeCheckedListBox
             // 
@@ -261,7 +268,6 @@ namespace BadmintonCourtAutoBooker
             this.timeCheckedListBox.Name = "timeCheckedListBox";
             this.timeCheckedListBox.Size = new System.Drawing.Size(120, 94);
             this.timeCheckedListBox.TabIndex = 5;
-            this.timeCheckedListBox.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.timeCheckedListBox_ItemCheck);
             // 
             // label4
             // 
@@ -302,7 +308,7 @@ namespace BadmintonCourtAutoBooker
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.untilDateTimePicker);
             this.groupBox3.Controls.Add(this.label7);
-            this.groupBox3.Location = new System.Drawing.Point(2, 332);
+            this.groupBox3.Location = new System.Drawing.Point(2, 326);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(2);
@@ -336,7 +342,7 @@ namespace BadmintonCourtAutoBooker
             this.timeUnduplicatedCheckBox.AutoSize = true;
             this.timeUnduplicatedCheckBox.Location = new System.Drawing.Point(74, 98);
             this.timeUnduplicatedCheckBox.Name = "timeUnduplicatedCheckBox";
-            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(126, 19);
+            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(125, 19);
             this.timeUnduplicatedCheckBox.TabIndex = 6;
             this.timeUnduplicatedCheckBox.Text = "Time unduplicated";
             this.timeUnduplicatedCheckBox.UseVisualStyleBackColor = true;
@@ -398,17 +404,17 @@ namespace BadmintonCourtAutoBooker
             this.label7.TabIndex = 1;
             this.label7.Text = "Until:";
             // 
-            // groupBox4
+            // groupBox6
             // 
-            this.groupBox4.Controls.Add(this.logListView);
-            this.groupBox4.Location = new System.Drawing.Point(2, 2);
-            this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox4.Size = new System.Drawing.Size(807, 660);
-            this.groupBox4.TabIndex = 4;
-            this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "Output Log";
+            this.groupBox6.Controls.Add(this.logListView);
+            this.groupBox6.Location = new System.Drawing.Point(2, 2);
+            this.groupBox6.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Padding = new System.Windows.Forms.Padding(2);
+            this.groupBox6.Size = new System.Drawing.Size(807, 653);
+            this.groupBox6.TabIndex = 4;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "Output Log";
             // 
             // logListView
             // 
@@ -417,7 +423,7 @@ namespace BadmintonCourtAutoBooker
             this.logListView.Location = new System.Drawing.Point(2, 18);
             this.logListView.Margin = new System.Windows.Forms.Padding(2);
             this.logListView.Name = "logListView";
-            this.logListView.Size = new System.Drawing.Size(803, 640);
+            this.logListView.Size = new System.Drawing.Size(803, 633);
             this.logListView.TabIndex = 0;
             this.logListView.UseCompatibleStateImageBehavior = false;
             // 
@@ -425,7 +431,7 @@ namespace BadmintonCourtAutoBooker
             // 
             this.groupBox5.Controls.Add(this.stopButton);
             this.groupBox5.Controls.Add(this.startButton);
-            this.groupBox5.Location = new System.Drawing.Point(2, 609);
+            this.groupBox5.Location = new System.Drawing.Point(2, 603);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(2);
@@ -461,23 +467,23 @@ namespace BadmintonCourtAutoBooker
             this.statusStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.versionToolStripStatusLabel});
-            this.statusStrip.Location = new System.Drawing.Point(0, 665);
+            this.statusStrip.Location = new System.Drawing.Point(0, 681);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1154, 22);
-            this.statusStrip.TabIndex = 5;
+            this.statusStrip.TabIndex = 2;
             this.statusStrip.Text = "statusStrip";
             // 
             // versionToolStripStatusLabel
             // 
             this.versionToolStripStatusLabel.Name = "versionToolStripStatusLabel";
-            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(152, 17);
+            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(151, 17);
             this.versionToolStripStatusLabel.Text = "versionToolStripStatusLabel";
             // 
             // splitContainer1
             // 
             this.splitContainer1.Cursor = System.Windows.Forms.Cursors.VSplit;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 24);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
@@ -487,39 +493,39 @@ namespace BadmintonCourtAutoBooker
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.panel1);
-            this.splitContainer1.Size = new System.Drawing.Size(1154, 665);
+            this.splitContainer1.Size = new System.Drawing.Size(1154, 657);
             this.splitContainer1.SplitterDistance = 330;
-            this.splitContainer1.TabIndex = 6;
+            this.splitContainer1.TabIndex = 1;
             // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.Controls.Add(this.groupBox1);
             this.flowLayoutPanel1.Controls.Add(this.groupBox2);
             this.flowLayoutPanel1.Controls.Add(this.groupBox3);
-            this.flowLayoutPanel1.Controls.Add(this.groupBox6);
+            this.flowLayoutPanel1.Controls.Add(this.groupBox4);
             this.flowLayoutPanel1.Controls.Add(this.groupBox5);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(330, 665);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(330, 657);
             this.flowLayoutPanel1.TabIndex = 0;
             // 
-            // groupBox6
+            // groupBox4
             // 
-            this.groupBox6.Controls.Add(this.sendTestMessageButton);
-            this.groupBox6.Controls.Add(this.channelIdTextBox);
-            this.groupBox6.Controls.Add(this.botTokenTextBox);
-            this.groupBox6.Controls.Add(this.telegramNotifyCheckBox);
-            this.groupBox6.Controls.Add(this.label11);
-            this.groupBox6.Controls.Add(this.label12);
-            this.groupBox6.Location = new System.Drawing.Point(2, 508);
-            this.groupBox6.Margin = new System.Windows.Forms.Padding(2);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox6.Size = new System.Drawing.Size(322, 97);
-            this.groupBox6.TabIndex = 3;
-            this.groupBox6.TabStop = false;
-            this.groupBox6.Text = "Notification Settings";
+            this.groupBox4.Controls.Add(this.sendTestMessageButton);
+            this.groupBox4.Controls.Add(this.channelIdTextBox);
+            this.groupBox4.Controls.Add(this.botTokenTextBox);
+            this.groupBox4.Controls.Add(this.useTelegramToNotifyCheckBox);
+            this.groupBox4.Controls.Add(this.label11);
+            this.groupBox4.Controls.Add(this.label12);
+            this.groupBox4.Location = new System.Drawing.Point(2, 502);
+            this.groupBox4.Margin = new System.Windows.Forms.Padding(2);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Padding = new System.Windows.Forms.Padding(2);
+            this.groupBox4.Size = new System.Drawing.Size(322, 97);
+            this.groupBox4.TabIndex = 3;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Notification Settings";
             // 
             // sendTestMessageButton
             // 
@@ -546,17 +552,17 @@ namespace BadmintonCourtAutoBooker
             this.botTokenTextBox.Size = new System.Drawing.Size(161, 23);
             this.botTokenTextBox.TabIndex = 2;
             // 
-            // telegramNotifyCheckBox
+            // useTelegramToNotifyCheckBox
             // 
-            this.telegramNotifyCheckBox.AutoSize = true;
-            this.telegramNotifyCheckBox.Location = new System.Drawing.Point(3, 19);
-            this.telegramNotifyCheckBox.Margin = new System.Windows.Forms.Padding(2);
-            this.telegramNotifyCheckBox.Name = "telegramNotifyCheckBox";
-            this.telegramNotifyCheckBox.Size = new System.Drawing.Size(147, 19);
-            this.telegramNotifyCheckBox.TabIndex = 0;
-            this.telegramNotifyCheckBox.Text = "Use Telegram to Notify";
-            this.telegramNotifyCheckBox.UseVisualStyleBackColor = true;
-            this.telegramNotifyCheckBox.CheckedChanged += new System.EventHandler(this.telegramNotifyCheckBox_CheckedChanged);
+            this.useTelegramToNotifyCheckBox.AutoSize = true;
+            this.useTelegramToNotifyCheckBox.Location = new System.Drawing.Point(3, 19);
+            this.useTelegramToNotifyCheckBox.Margin = new System.Windows.Forms.Padding(2);
+            this.useTelegramToNotifyCheckBox.Name = "useTelegramToNotifyCheckBox";
+            this.useTelegramToNotifyCheckBox.Size = new System.Drawing.Size(146, 19);
+            this.useTelegramToNotifyCheckBox.TabIndex = 0;
+            this.useTelegramToNotifyCheckBox.Text = "Use Telegram to Notify";
+            this.useTelegramToNotifyCheckBox.UseVisualStyleBackColor = true;
+            this.useTelegramToNotifyCheckBox.CheckedChanged += new System.EventHandler(this.telegramNotifyCheckBox_CheckedChanged);
             // 
             // label11
             // 
@@ -574,26 +580,68 @@ namespace BadmintonCourtAutoBooker
             this.label12.Location = new System.Drawing.Point(5, 48);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(60, 15);
+            this.label12.Size = new System.Drawing.Size(59, 15);
             this.label12.TabIndex = 1;
             this.label12.Text = "BotToken:";
             // 
             // panel1
             // 
-            this.panel1.Controls.Add(this.groupBox4);
+            this.panel1.Controls.Add(this.groupBox6);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(820, 665);
+            this.panel1.Size = new System.Drawing.Size(820, 657);
             this.panel1.TabIndex = 0;
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.settingsToolStripMenuItem,
+            this.viewToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(1154, 24);
+            this.menuStrip1.TabIndex = 0;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // settingsToolStripMenuItem
+            // 
+            this.settingsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem});
+            this.settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
+            this.settingsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
+            this.settingsToolStripMenuItem.Text = "Settings";
+            // 
+            // checkWebsiteStatusOnFirstExecutionToolStripMenuItem
+            // 
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Name = "checkWebsiteStatusOnFirstExecutionToolStripMenuItem";
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Text = "Check Website Status on First Execution";
+            // 
+            // viewToolStripMenuItem
+            // 
+            this.viewToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.orderListToolStripMenuItem});
+            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
+            this.viewToolStripMenuItem.Size = new System.Drawing.Size(44, 20);
+            this.viewToolStripMenuItem.Text = "View";
+            // 
+            // orderListToolStripMenuItem
+            // 
+            this.orderListToolStripMenuItem.Name = "orderListToolStripMenuItem";
+            this.orderListToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
+            this.orderListToolStripMenuItem.Text = "Order List";
+            this.orderListToolStripMenuItem.Click += new System.EventHandler(this.orderListToolStripMenuItem_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1154, 687);
+            this.ClientSize = new System.Drawing.Size(1154, 703);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
             this.Text = "BadmintonCourtAutoBooker";
@@ -607,7 +655,7 @@ namespace BadmintonCourtAutoBooker
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
+            this.groupBox6.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
@@ -616,9 +664,11 @@ namespace BadmintonCourtAutoBooker
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.flowLayoutPanel1.ResumeLayout(false);
-            this.groupBox6.ResumeLayout(false);
-            this.groupBox6.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -644,15 +694,13 @@ namespace BadmintonCourtAutoBooker
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.DateTimePicker untilDateTimePicker;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.ListView logListView;
         private System.Windows.Forms.CheckBox monitorCheckBox;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.Button stopButton;
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Button tryLoginButton;
-        private System.Windows.Forms.Button courtSelectButton;
-        private System.Windows.Forms.Button timeSelectButton;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.CheckBox timeUnduplicatedCheckBox;
         private System.Windows.Forms.StatusStrip statusStrip;
@@ -665,13 +713,20 @@ namespace BadmintonCourtAutoBooker
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.GroupBox groupBox6;
-        private System.Windows.Forms.CheckBox telegramNotifyCheckBox;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.CheckBox useTelegramToNotifyCheckBox;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TextBox channelIdTextBox;
         private System.Windows.Forms.TextBox botTokenTextBox;
         private System.Windows.Forms.Button sendTestMessageButton;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem viewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem orderListToolStripMenuItem;
+        private System.Windows.Forms.CheckBox courtSelectCheckBox;
+        private System.Windows.Forms.CheckBox timeSelectCheckBox;
+        private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem checkWebsiteStatusOnFirstExecutionToolStripMenuItem;
     }
 }
 

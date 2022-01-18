@@ -73,9 +73,9 @@ namespace BadmintonCourtAutoBooker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap checkbox_checked {
+        internal static System.Drawing.Bitmap Cancel {
             get {
-                object obj = ResourceManager.GetObject("checkbox_checked", resourceCulture);
+                object obj = ResourceManager.GetObject("Cancel", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace BadmintonCourtAutoBooker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap checkbox_unchecked {
+        internal static System.Drawing.Bitmap Circle_Gray {
             get {
-                object obj = ResourceManager.GetObject("checkbox_unchecked", resourceCulture);
+                object obj = ResourceManager.GetObject("Circle_Gray", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace BadmintonCourtAutoBooker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap circle_gray {
+        internal static System.Drawing.Bitmap Circle_Green {
             get {
-                object obj = ResourceManager.GetObject("circle_gray", resourceCulture);
+                object obj = ResourceManager.GetObject("Circle_Green", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace BadmintonCourtAutoBooker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap circle_green {
+        internal static System.Drawing.Bitmap Circle_Red {
             get {
-                object obj = ResourceManager.GetObject("circle_green", resourceCulture);
+                object obj = ResourceManager.GetObject("Circle_Red", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +113,19 @@ namespace BadmintonCourtAutoBooker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap circle_red {
+        internal static System.Drawing.Bitmap Order_List {
             get {
-                object obj = ResourceManager.GetObject("circle_red", resourceCulture);
+                object obj = ResourceManager.GetObject("Order_List", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap View_Detail {
+            get {
+                object obj = ResourceManager.GetObject("View_Detail", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -7,25 +7,23 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using RestSharp;
-using Telegram.Bot;
 using static BadmintonCourtAutoBooker.BookingBot;
 
 namespace BadmintonCourtAutoBooker
 {
     public partial class MainForm : Form
     {
+        /* Share with other forms */
+        internal static List<SportCenter> SportCenters;
+
         /* Timer for waiting to book and monitor */
         private readonly Timer bookingTimer = new Timer() { Interval = 500, Enabled = false };
         /* BackgroundWorker for booking */
         private readonly List<BackgroundWorkerPair> backgroundWorkerPairs = new List<BackgroundWorkerPair>();
         private readonly System.Threading.Mutex mutex = new System.Threading.Mutex();
 
-        private readonly List<SportCenter> sportCenters = new List<SportCenter>();
         private readonly List<int> courtBookingRecord = new List<int>();
         private readonly List<ToolStripStatusLabel> toolStripStatusLabels = new List<ToolStripStatusLabel>();
-
-        /* Telegram.Bot configs */
-        private TelegramBot telegramBot;
 
         private SportCenter currentSportCenter;
         private DateTime waitDateTime;
@@ -40,48 +38,52 @@ namespace BadmintonCourtAutoBooker
         private const string LogDirPath = "./logs";
 
         private Size checkButtonImageSize = new Size(24, 24);
-        private Size circleImageSize;
+        private Size toolStripMenuItemImageSize;
+        private Size toolStripStatusLabelImageSize;
 
         public MainForm()
         {
-            sportCenters.Add(new SportCenter()
+            SportCenters = new List<SportCenter>()
             {
-                Name = "新竹市立竹光國民運動中心",
-                BaseUrl = "https://scr.cyc.org.tw",
-                ModuleName = "tp16.aspx",
-                Courts = new Dictionary<string, int>()
+                new SportCenter()
                 {
-                    { "羽1", 1175 },
-                    { "羽2", 1174 },
-                    { "羽3", 1176 },
-                    { "羽4", 1192 }
+                    Name = "新竹市立竹光國民運動中心",
+                    BaseUrl = "https://scr.cyc.org.tw",
+                    ModuleName = "tp16.aspx",
+                    Courts = new Dictionary<string, int>()
+                    {
+                        { "羽1", 1175 },
+                        { "羽2", 1174 },
+                        { "羽3", 1176 },
+                        { "羽4", 1192 }
+                    },
+                    DayDiff = 6
                 },
-                DayDiff = 6
-            });
-            sportCenters.Add(new SportCenter()
-            {
-                Name = "新竹縣立竹北國民運動中心",
-                BaseUrl = "https://fe.xuanen.com.tw",
-                ModuleName = "fe02.aspx",
-                Courts = new Dictionary<string, int>()
+                new SportCenter()
                 {
-                    { "2F-1", 83 },
-                    { "2F-2", 84 },
-                    { "2F-3", 1074 },
-                    { "2F-4", 1075 },
-                    { "2F-5", 87 },
-                    { "2F-6", 88 },
-                    { "2F-7", 2115 },
-                    { "2F-8", 2116 },
-                    { "4F-B1", 2123 },
-                    { "4F-B2", 2124 },
-                    { "4F-B3", 2125 },
-                    { "4F-B4", 2126 },
-                    { "4F-B5", 2127 },
-                    { "4F-B6", 2128 }
-                },
-                DayDiff = 7
-            });
+                    Name = "新竹縣立竹北國民運動中心",
+                    BaseUrl = "https://fe.xuanen.com.tw",
+                    ModuleName = "fe02.aspx",
+                    Courts = new Dictionary<string, int>()
+                    {
+                        { "2F-1", 83 },
+                        { "2F-2", 84 },
+                        { "2F-3", 1074 },
+                        { "2F-4", 1075 },
+                        { "2F-5", 87 },
+                        { "2F-6", 88 },
+                        { "2F-7", 2115 },
+                        { "2F-8", 2116 },
+                        { "4F-B1", 2123 },
+                        { "4F-B2", 2124 },
+                        { "4F-B3", 2125 },
+                        { "4F-B4", 2126 },
+                        { "4F-B5", 2127 },
+                        { "4F-B6", 2128 }
+                    },
+                    DayDiff = 7
+                }
+            };
 
             InitializeComponent();
         }
@@ -89,7 +91,12 @@ namespace BadmintonCourtAutoBooker
         private void MainForm_Load(object sender, EventArgs e)
         {
             /* Initial variables */
-            circleImageSize = new Size(versionToolStripStatusLabel.Size.Height, versionToolStripStatusLabel.Size.Height);
+            toolStripMenuItemImageSize = new Size(viewToolStripMenuItem.Size.Height, viewToolStripMenuItem.Size.Height);
+            toolStripStatusLabelImageSize = new Size(versionToolStripStatusLabel.Size.Height, versionToolStripStatusLabel.Size.Height);
+
+            /* MenuStrip */
+            checkWebsiteStatusOnFirstExecutionToolStripMenuItem.CheckOnClick = true;
+            orderListToolStripMenuItem.Image = new Bitmap(Properties.Resources.Order_List, toolStripMenuItemImageSize);
 
             /* SplitContainer */
             splitContainer1.IsSplitterFixed = true;
@@ -102,7 +109,7 @@ namespace BadmintonCourtAutoBooker
             /* GroupBox of booking settings */
             sportCenterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             sportCenterComboBox.Items.Clear();
-            foreach (SportCenter sportCenter in sportCenters)
+            foreach (SportCenter sportCenter in SportCenters)
             {
                 sportCenterComboBox.Items.Add(sportCenter.Name);
             }
@@ -116,10 +123,8 @@ namespace BadmintonCourtAutoBooker
             {
                 timeCheckedListBox.Items.Add(string.Format("{0:00}:00-{1:00}:00", i, i + 1));
             }
-            timeSelectButton.Image = new Bitmap(Properties.Resources.checkbox_checked, checkButtonImageSize);
 
             courtCheckedListBox.Items.Clear();
-            courtSelectButton.Image = new Bitmap(Properties.Resources.checkbox_checked, checkButtonImageSize);
 
             /* GroupBox of monitor settings */
             untilDateTimePicker.Format = DateTimePickerFormat.Custom;
@@ -141,6 +146,7 @@ namespace BadmintonCourtAutoBooker
             /* GroupBox of actions */
             stopButton.Enabled = false;
 
+            /* Log ListView */
             logListView.View = View.Details;
             logListView.FullRowSelect = true;
             logListView.Columns.Add("#", 30, HorizontalAlignment.Center);
@@ -159,20 +165,20 @@ namespace BadmintonCourtAutoBooker
             toolStripStatusLabels.Add(new ToolStripStatusLabel()
             {
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
-                Image = new Bitmap(Properties.Resources.circle_gray, circleImageSize),
+                Image = new Bitmap(Properties.Resources.Circle_Gray, toolStripStatusLabelImageSize),
                 ImageScaling = ToolStripItemImageScaling.None,
                 Text = "https://ocr.holey.cc",
                 ToolTipText = "OCR Website Status"
             });
-            for (int i = 0; i < sportCenters.Count; i++)
+            for (int i = 0; i < SportCenters.Count; i++)
             {
                 toolStripStatusLabels.Add(new ToolStripStatusLabel()
                 {
                     DisplayStyle = ToolStripItemDisplayStyle.Image,
-                    Image = new Bitmap(Properties.Resources.circle_gray, circleImageSize),
+                    Image = new Bitmap(Properties.Resources.Circle_Gray, toolStripStatusLabelImageSize),
                     ImageScaling = ToolStripItemImageScaling.None,
-                    Text = $"{sportCenters[i].BaseUrl}/{sportCenters[i].ModuleName}",
-                    ToolTipText = $"{sportCenters[i].Name} Status"
+                    Text = $"{SportCenters[i].BaseUrl}/{SportCenters[i].ModuleName}",
+                    ToolTipText = $"{SportCenters[i].Name} Status"
                 });
             }
             for (int i = 0; i < toolStripStatusLabels.Count; i++)
@@ -190,9 +196,13 @@ namespace BadmintonCourtAutoBooker
 
         private void MainForm_Shown(object sender, EventArgs e)
         {
-            for (int i = 0; i < toolStripStatusLabels.Count; i++)
+            if (!System.Diagnostics.Debugger.IsAttached &&
+                checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Checked)
             {
-                toolStripStatusLabels[i].PerformClick();
+                for (int i = 0; i < toolStripStatusLabels.Count; i++)
+                {
+                    toolStripStatusLabels[i].PerformClick();
+                }
             }
         }
 
@@ -203,6 +213,17 @@ namespace BadmintonCourtAutoBooker
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e) => new System.Threading.Thread(() => CancelBackgroundWorkers()).Start();
+
+        private void orderListToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OrderListForm orderListForm = new OrderListForm()
+            {
+                Username = usernameTextBox.Text,
+                Password = passwordTextBox.Text,
+                SportCenter = currentSportCenter
+            };
+            orderListForm.Show();
+        }
 
         #region GroupBox of Account Settings
 
@@ -238,10 +259,10 @@ namespace BadmintonCourtAutoBooker
         {
             SportCenter recordSportCenter = currentSportCenter;
             courtCheckedListBox.Items.Clear();
-            foreach (var court in sportCenters.First(sportcCenter => sportcCenter.Name == sportCenterComboBox.SelectedItem.ToString()).Courts)
+            foreach (var court in SportCenters.First(sportcCenter => sportcCenter.Name == sportCenterComboBox.SelectedItem.ToString()).Courts)
             {
                 courtCheckedListBox.Items.Add(court.Key);
-                currentSportCenter = sportCenters.First(sportcCenter => sportcCenter.Name == sportCenterComboBox.SelectedItem.ToString());
+                currentSportCenter = SportCenters.First(sportcCenter => sportcCenter.Name == sportCenterComboBox.SelectedItem.ToString());
             }
             if (recordSportCenter != null &&
                 dateDateTimePicker.Value.Date == DateTime.Now.AddDays(recordSportCenter.DayDiff + 1).Date)
@@ -250,31 +271,23 @@ namespace BadmintonCourtAutoBooker
             }
         }
 
-        private void timeSelectButton_Click(object sender, EventArgs e)
+        private void timeSelectCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             bool checkStatus = timeCheckedListBox.CheckedItems.Count == 0;
             for (int i = 0; i < timeCheckedListBox.Items.Count; i++)
             {
                 timeCheckedListBox.SetItemChecked(i, checkStatus);
             }
-            SetTimeSelectButtonStatus(!checkStatus);
         }
 
-        private void courtSelectButton_Click(object sender, EventArgs e)
+        private void courtSelectCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             bool checkStatus = courtCheckedListBox.CheckedItems.Count == 0;
             for (int i = 0; i < courtCheckedListBox.Items.Count; i++)
             {
                 courtCheckedListBox.SetItemChecked(i, checkStatus);
             }
-            SetCourtSelectButtonStatus(!checkStatus);
         }
-
-        private void timeCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e) =>
-            SetTimeSelectButtonStatus(timeCheckedListBox.CheckedItems.Count == 1 && e.NewValue == CheckState.Unchecked);
-
-        private void courtCheckedListBox_ItemCheck(object sender, ItemCheckEventArgs e) =>
-            SetCourtSelectButtonStatus(courtCheckedListBox.CheckedItems.Count == 1 && e.NewValue == CheckState.Unchecked);
 
         #endregion
 
@@ -296,7 +309,7 @@ namespace BadmintonCourtAutoBooker
             botTokenTextBox.Enabled =
                 channelIdTextBox.Enabled =
                 sendTestMessageButton.Enabled =
-                telegramNotifyCheckBox.Checked;
+                useTelegramToNotifyCheckBox.Checked;
 
         private void sendTestMessageButton_Click(object sender, EventArgs e)
         {
@@ -306,13 +319,13 @@ namespace BadmintonCourtAutoBooker
             }
             else
             {
-                telegramBot = new TelegramBot(
-                    botToken: botTokenTextBox.Text,
-                    channelId: channelIdTextBox.Text);
+                TelegramBot telegramBot = new TelegramBot(botToken: botTokenTextBox.Text, channelId: channelIdTextBox.Text);
                 new Task(() =>
                 {
                     _ = telegramBot.SendMessageByTelegramBotAsync($"[BadmintonCourtAutoBooker] This test message is sent at {DateTime.Now:yyyy-MM-dd HH:mm:ss}.");
+                    MessageBox.Show("Sent test message successful.", "Send Test Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }).Start();
+
             }
         }
 
@@ -357,7 +370,7 @@ namespace BadmintonCourtAutoBooker
         {
             ToolStripStatusLabel toolStripStatusLabel = (ToolStripStatusLabel)sender;
             toolStripStatusLabel.ToolTipText = toolStripStatusLabel.ToolTipText.Split('(')[0].Trim();
-            toolStripStatusLabel.Image = new Bitmap(Properties.Resources.circle_gray, circleImageSize);
+            toolStripStatusLabel.Image = new Bitmap(Properties.Resources.Circle_Gray, toolStripStatusLabelImageSize);
             Log($"Testing connection of {toolStripStatusLabel.ToolTipText[..toolStripStatusLabel.ToolTipText.IndexOf(" Status")]}");
 
             new System.Threading.Thread(() =>
@@ -451,6 +464,9 @@ namespace BadmintonCourtAutoBooker
                             MonitorTimeUnduplicated = timeUnduplicatedCheckBox.Checked,
                             MonitorBaseOnBookingSettings = monitorBaseOnBookingSettingsCheckBox.Checked,
                             MonitorBySingleThread = monitorBySingleThreadCheckBox.Checked,
+                            /* Notify settings */
+                            UseTelegramToNotify = useTelegramToNotifyCheckBox.Checked,
+                            TelegramBot = new TelegramBot(botToken: botTokenTextBox.Text, channelId: channelIdTextBox.Text),
                             /* BackgroundWorker settings */
                             Id = bgWorkerId
                         };
@@ -487,6 +503,9 @@ namespace BadmintonCourtAutoBooker
                     MonitorTimeUnduplicated = timeUnduplicatedCheckBox.Checked,
                     MonitorBaseOnBookingSettings = monitorBaseOnBookingSettingsCheckBox.Checked,
                     MonitorBySingleThread = monitorBySingleThreadCheckBox.Checked,
+                    /* Notify settings */
+                    UseTelegramToNotify = useTelegramToNotifyCheckBox.Checked,
+                    TelegramBot = new TelegramBot(botToken: botTokenTextBox.Text, channelId: channelIdTextBox.Text),
                     /* BackgroundWorker settings */
                     Id = bgWorkerId
                 };
@@ -594,11 +613,11 @@ namespace BadmintonCourtAutoBooker
                     if (bookingBot.BookCourt(courtCode, timeCode, args.DestDate))
                     {
                         Log($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})", logType: LogType.Okay, id: args.Id);
-                        if (telegramNotifyCheckBox.Checked)
+                        if (args.UseTelegramToNotify)
                         {
                             new Task(() =>
                             {
-                                _ = telegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})");
+                                _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})");
                             }).Start();
                         }
                     }
@@ -722,11 +741,11 @@ namespace BadmintonCourtAutoBooker
                                 {
                                     Log($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})", logType: LogType.Okay, id: args.Id);
                                     courtBookingRecord.Add(court.TimeCode);
-                                    if (telegramNotifyCheckBox.Checked)
+                                    if (args.UseTelegramToNotify)
                                     {
                                         new Task(() =>
                                         {
-                                            _ = telegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})");
+                                            _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})");
                                         }).Start();
                                     }
                                 }
@@ -828,17 +847,12 @@ namespace BadmintonCourtAutoBooker
                 groupBox1.Enabled =
                     groupBox2.Enabled =
                     groupBox3.Enabled =
+                    groupBox4.Enabled =
                     startButton.Enabled =
                     status;
                 stopButton.Enabled = !status;
             }
         }
-
-        private void SetTimeSelectButtonStatus(bool status) =>
-            timeSelectButton.Image = new Bitmap(status ? Properties.Resources.checkbox_checked : Properties.Resources.checkbox_unchecked, checkButtonImageSize);
-
-        private void SetCourtSelectButtonStatus(bool status) =>
-            courtSelectButton.Image = new Bitmap(status ? Properties.Resources.checkbox_checked : Properties.Resources.checkbox_unchecked, checkButtonImageSize);
 
         private void Log(string message, LogType logType = LogType.Info, int id = 0, string oriDateTime = "")
         {
@@ -884,7 +898,7 @@ namespace BadmintonCourtAutoBooker
             }
             else
             {
-                toolStripStatusLabel.Image = new Bitmap((httpStatusCode == HttpStatusCode.OK) ? Properties.Resources.circle_green : Properties.Resources.circle_red, circleImageSize);
+                toolStripStatusLabel.Image = new Bitmap((httpStatusCode == HttpStatusCode.OK) ? Properties.Resources.Circle_Green : Properties.Resources.Circle_Red, toolStripStatusLabelImageSize);
                 toolStripStatusLabel.ToolTipText += $" ({(int)httpStatusCode} {httpStatusCode}, {DateTime.Now:yyyy-MM-dd HH:mm:ss})";
                 Log($"{(int)httpStatusCode} {httpStatusCode} from connection of {toolStripStatusLabel.ToolTipText[..toolStripStatusLabel.ToolTipText.IndexOf(" Status")]}", logType: httpStatusCode == HttpStatusCode.OK ? LogType.Okay : LogType.Failed);
             }
@@ -920,6 +934,8 @@ namespace BadmintonCourtAutoBooker
             IniManager iniManager = new IniManager(IniPath);
             /* IniInfo */
             iniManager.WriteIniFile("IniInfo", "Version", IniVersion);
+            /* Settings */
+            iniManager.WriteIniFile("Settings", "CheckWebsiteStatusOnFirstExecution", checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Checked);
             /* Account */
             iniManager.WriteIniFile("Account", "Username", usernameTextBox.Text.Encrypt(cryptoKey) ?? "");
             iniManager.WriteIniFile("Account", "Password", passwordTextBox.Text.Encrypt(cryptoKey) ?? "");
@@ -935,7 +951,7 @@ namespace BadmintonCourtAutoBooker
             iniManager.WriteIniFile("Monitor", "BasedOnBookingSettings", monitorBaseOnBookingSettingsCheckBox.Checked);
             iniManager.WriteIniFile("Monitor", "BySingleThread", monitorBySingleThreadCheckBox.Checked);
             /* Telegram Bot */
-            iniManager.WriteIniFile("TelegramBot", "TelegramNotify", telegramNotifyCheckBox.Checked);
+            iniManager.WriteIniFile("TelegramBot", "TelegramNotify", useTelegramToNotifyCheckBox.Checked);
             iniManager.WriteIniFile("TelegramBot", "BotToken", botTokenTextBox.Text.Encrypt(cryptoKey) ?? "");
             iniManager.WriteIniFile("TelegramBot", "ChannelId", channelIdTextBox.Text.Encrypt(cryptoKey) ?? "");
         }
@@ -943,6 +959,8 @@ namespace BadmintonCourtAutoBooker
         private void LoadConfigs()
         {
             IniManager iniManager = new IniManager(IniPath);
+            /* Settings */
+            checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Checked = bool.Parse(iniManager.ReadIniFile("Settings", "CheckWebsiteStatusOnFirstExecution", "true"));
             /* Account */
             usernameTextBox.Text = iniManager.ReadIniFile("Account", "Username", "").Decrypt(cryptoKey) ?? "";
             passwordTextBox.Text = iniManager.ReadIniFile("Account", "Password", "").Decrypt(cryptoKey) ?? "";
@@ -958,7 +976,7 @@ namespace BadmintonCourtAutoBooker
             monitorBaseOnBookingSettingsCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BasedOnBookingSettings", "true"));
             monitorBySingleThreadCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BySingleThread", "true"));
             /* Telegram Bot */
-            telegramNotifyCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("TelegramBot", "TelegramNotify", "false"));
+            useTelegramToNotifyCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("TelegramBot", "TelegramNotify", "false"));
             botTokenTextBox.Text = iniManager.ReadIniFile("TelegramBot", "BotToken", "").Decrypt(cryptoKey) ?? "";
             channelIdTextBox.Text = iniManager.ReadIniFile("TelegramBot", "ChannelId", "").Decrypt(cryptoKey) ?? "";
 
