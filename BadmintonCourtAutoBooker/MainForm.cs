@@ -373,7 +373,8 @@ namespace BadmintonCourtAutoBooker
 
         #endregion
 
-        private void logListViewContextMenuStrip_Opening(object sender, CancelEventArgs e) => exportToolStripMenuItem.Enabled = logListView.SelectedItems.Count > 0;
+        private void logListViewContextMenuStrip_Opening(object sender, CancelEventArgs e) =>
+            exportToolStripMenuItem.Enabled = logListView.SelectedItems.Count > 0;
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -708,42 +709,34 @@ namespace BadmintonCourtAutoBooker
                 }
             }
 
-            mutex.WaitOne();
-            backgroundWorkerPairs.First(backgroundWorkerPair => backgroundWorkerPair.BackgroundWorker == (BackgroundWorker)sender).IsFinished = true;
-            mutex.ReleaseMutex();
-
             /* 
              * Monitor
              *     If in the "Monitor By Single Thread" mode, must sure that
              *     only one BackgroungWorker can set the finished flag in the
              *     same time.
              */
-            if ((args.MonitorBySingleThread && mutex.WaitOne()) ||
-                !args.MonitorBySingleThread)
+            if (!args.MonitorBySingleThread)
             {
                 backgroundWorker_Monitor(sender, e, bookingBot);
             }
-        }
-
-        private void backgroundWorker_Monitor(object sender, DoWorkEventArgs e, BookingBot bookingBot)
-        {
-            BackgroundWrokerArguments args = (BackgroundWrokerArguments)e.Argument;
-            backgroundWorkerPairs.First(backgroundWorkerPair => backgroundWorkerPair.BackgroundWorker == (BackgroundWorker)sender).IsFinished = true;
-
-            if (args.MonitorBySingleThread)
+            else
             {
-                bool isReturned = false;
-                if (!backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
+                Log("Finished first booking", logType: LogType.Okay, id: args.Id);
+                if (IsLastBackgroundWorker((BackgroundWorker)sender))
                 {
-                    Log("Finished first booking", logType: LogType.Okay, id: args.Id);
-                    isReturned = true;
+                    return;
+                }
+                else
+                {
+                    Log("Monitor by current BackgroungWorker", id: args.Id);
+                    backgroundWorker_Monitor(sender, e, bookingBot);
                 }
             }
 
             /*
              * Dispose all BackgroundWorker after inished to auto-book courts
              */
-            if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
+            if (IsLastBackgroundWorker((BackgroundWorker)sender))
             {
                 Log($"Finished to auto-book courts", logType: LogType.Okay);
                 this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
@@ -885,6 +878,16 @@ namespace BadmintonCourtAutoBooker
             }
         }
 
+        private bool IsLastBackgroundWorker(BackgroundWorker backgroundWorker)
+        {
+            mutex.WaitOne();
+            backgroundWorkerPairs.First(backgroundWorkerPair => backgroundWorkerPair.BackgroundWorker == backgroundWorker).IsFinished = true;
+            bool isLastBackgroundWorker = backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished);
+            mutex.ReleaseMutex();
+
+            return isLastBackgroundWorker;
+        }
+
         #endregion
 
         private bool IsServiceTime(DateTime dateTime) => 2 <= dateTime.Hour && dateTime.Hour <= 4;
@@ -924,7 +927,10 @@ namespace BadmintonCourtAutoBooker
 
             backgroundWorkerPairs = null;
             courtBookingRecord = null;
-            mutex.Close();
+            if (mutex != null)
+            {
+                mutex.Close();
+            }
             SetFormControl(true);
         }
 
@@ -1052,7 +1058,7 @@ namespace BadmintonCourtAutoBooker
             iniManager.WriteIniFile("Monitor", "BasedOnBookingSettings", monitorBaseOnBookingSettingsCheckBox.Checked);
             iniManager.WriteIniFile("Monitor", "BySingleThread", monitorBySingleThreadCheckBox.Checked);
             /* Telegram Bot */
-            iniManager.WriteIniFile("TelegramBot", "TelegramNotify", useTelegramToNotifyCheckBox.Checked);
+            iniManager.WriteIniFile("TelegramBot", "UseTelegramNotify", useTelegramToNotifyCheckBox.Checked);
             iniManager.WriteIniFile("TelegramBot", "BotToken", botTokenTextBox.Text.Encrypt(cryptoKey) ?? "");
             iniManager.WriteIniFile("TelegramBot", "ChannelId", channelIdTextBox.Text.Encrypt(cryptoKey) ?? "");
         }
@@ -1077,7 +1083,7 @@ namespace BadmintonCourtAutoBooker
             monitorBaseOnBookingSettingsCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BasedOnBookingSettings", "true"));
             monitorBySingleThreadCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Monitor", "BySingleThread", "true"));
             /* Telegram Bot */
-            useTelegramToNotifyCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("TelegramBot", "TelegramNotify", "false"));
+            useTelegramToNotifyCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("TelegramBot", "UseTelegramNotify", "false"));
             botTokenTextBox.Text = iniManager.ReadIniFile("TelegramBot", "BotToken", "").Decrypt(cryptoKey) ?? "";
             channelIdTextBox.Text = iniManager.ReadIniFile("TelegramBot", "ChannelId", "").Decrypt(cryptoKey) ?? "";
 
