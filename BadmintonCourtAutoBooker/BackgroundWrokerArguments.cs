@@ -31,6 +31,8 @@ namespace BadmintonCourtAutoBooker
 
         #region Monitor settings
 
+        public bool UseMonitor { get; set; }
+
         public List<int> MonitorTimeCodes { get; set; }
 
         public List<int> MonitorCourtCodes { get; set; }

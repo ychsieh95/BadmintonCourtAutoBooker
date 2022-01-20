@@ -29,6 +29,7 @@ namespace BadmintonCourtAutoBooker
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tryLoginButton = new System.Windows.Forms.Button();
             this.passwordTextBox = new System.Windows.Forms.TextBox();
@@ -53,7 +54,7 @@ namespace BadmintonCourtAutoBooker
             this.monitorBaseOnBookingSettingsCheckBox = new System.Windows.Forms.CheckBox();
             this.timeUnduplicatedCheckBox = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.monitorCheckBox = new System.Windows.Forms.CheckBox();
+            this.useMonitorCheckBox = new System.Windows.Forms.CheckBox();
             this.intervalDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.label8 = new System.Windows.Forms.Label();
             this.untilDateTimePicker = new System.Windows.Forms.DateTimePicker();
@@ -80,6 +81,9 @@ namespace BadmintonCourtAutoBooker
             this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.orderListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.logListViewContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -94,6 +98,7 @@ namespace BadmintonCourtAutoBooker
             this.groupBox4.SuspendLayout();
             this.panel1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
+            this.logListViewContextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -303,7 +308,7 @@ namespace BadmintonCourtAutoBooker
             this.groupBox3.Controls.Add(this.monitorBaseOnBookingSettingsCheckBox);
             this.groupBox3.Controls.Add(this.timeUnduplicatedCheckBox);
             this.groupBox3.Controls.Add(this.label9);
-            this.groupBox3.Controls.Add(this.monitorCheckBox);
+            this.groupBox3.Controls.Add(this.useMonitorCheckBox);
             this.groupBox3.Controls.Add(this.intervalDateTimePicker);
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.untilDateTimePicker);
@@ -342,7 +347,7 @@ namespace BadmintonCourtAutoBooker
             this.timeUnduplicatedCheckBox.AutoSize = true;
             this.timeUnduplicatedCheckBox.Location = new System.Drawing.Point(74, 98);
             this.timeUnduplicatedCheckBox.Name = "timeUnduplicatedCheckBox";
-            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(125, 19);
+            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(126, 19);
             this.timeUnduplicatedCheckBox.TabIndex = 6;
             this.timeUnduplicatedCheckBox.Text = "Time unduplicated";
             this.timeUnduplicatedCheckBox.UseVisualStyleBackColor = true;
@@ -356,17 +361,17 @@ namespace BadmintonCourtAutoBooker
             this.label9.TabIndex = 5;
             this.label9.Text = "Mode:";
             // 
-            // monitorCheckBox
+            // useMonitorCheckBox
             // 
-            this.monitorCheckBox.AutoSize = true;
-            this.monitorCheckBox.Location = new System.Drawing.Point(4, 20);
-            this.monitorCheckBox.Margin = new System.Windows.Forms.Padding(2);
-            this.monitorCheckBox.Name = "monitorCheckBox";
-            this.monitorCheckBox.Size = new System.Drawing.Size(91, 19);
-            this.monitorCheckBox.TabIndex = 0;
-            this.monitorCheckBox.Text = "Use monitor";
-            this.monitorCheckBox.UseVisualStyleBackColor = true;
-            this.monitorCheckBox.CheckedChanged += new System.EventHandler(this.monitorCheckBox_CheckedChanged);
+            this.useMonitorCheckBox.AutoSize = true;
+            this.useMonitorCheckBox.Location = new System.Drawing.Point(4, 20);
+            this.useMonitorCheckBox.Margin = new System.Windows.Forms.Padding(2);
+            this.useMonitorCheckBox.Name = "useMonitorCheckBox";
+            this.useMonitorCheckBox.Size = new System.Drawing.Size(91, 19);
+            this.useMonitorCheckBox.TabIndex = 0;
+            this.useMonitorCheckBox.Text = "Use monitor";
+            this.useMonitorCheckBox.UseVisualStyleBackColor = true;
+            this.useMonitorCheckBox.CheckedChanged += new System.EventHandler(this.monitorCheckBox_CheckedChanged);
             // 
             // intervalDateTimePicker
             // 
@@ -476,7 +481,7 @@ namespace BadmintonCourtAutoBooker
             // versionToolStripStatusLabel
             // 
             this.versionToolStripStatusLabel.Name = "versionToolStripStatusLabel";
-            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(151, 17);
+            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(152, 17);
             this.versionToolStripStatusLabel.Text = "versionToolStripStatusLabel";
             // 
             // splitContainer1
@@ -558,7 +563,7 @@ namespace BadmintonCourtAutoBooker
             this.useTelegramToNotifyCheckBox.Location = new System.Drawing.Point(3, 19);
             this.useTelegramToNotifyCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.useTelegramToNotifyCheckBox.Name = "useTelegramToNotifyCheckBox";
-            this.useTelegramToNotifyCheckBox.Size = new System.Drawing.Size(146, 19);
+            this.useTelegramToNotifyCheckBox.Size = new System.Drawing.Size(147, 19);
             this.useTelegramToNotifyCheckBox.TabIndex = 0;
             this.useTelegramToNotifyCheckBox.Text = "Use Telegram to Notify";
             this.useTelegramToNotifyCheckBox.UseVisualStyleBackColor = true;
@@ -580,7 +585,7 @@ namespace BadmintonCourtAutoBooker
             this.label12.Location = new System.Drawing.Point(5, 48);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(59, 15);
+            this.label12.Size = new System.Drawing.Size(60, 15);
             this.label12.TabIndex = 1;
             this.label12.Text = "BotToken:";
             // 
@@ -615,7 +620,7 @@ namespace BadmintonCourtAutoBooker
             // checkWebsiteStatusOnFirstExecutionToolStripMenuItem
             // 
             this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Name = "checkWebsiteStatusOnFirstExecutionToolStripMenuItem";
-            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Size = new System.Drawing.Size(283, 22);
             this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Text = "Check Website Status on First Execution";
             // 
             // viewToolStripMenuItem
@@ -632,6 +637,29 @@ namespace BadmintonCourtAutoBooker
             this.orderListToolStripMenuItem.Size = new System.Drawing.Size(125, 22);
             this.orderListToolStripMenuItem.Text = "Order List";
             this.orderListToolStripMenuItem.Click += new System.EventHandler(this.orderListToolStripMenuItem_Click);
+            // 
+            // logListViewContextMenuStrip
+            // 
+            this.logListViewContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportToolStripMenuItem,
+            this.clearToolStripMenuItem});
+            this.logListViewContextMenuStrip.Name = "logListViewContextMenuStrip";
+            this.logListViewContextMenuStrip.Size = new System.Drawing.Size(181, 70);
+            this.logListViewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.logListViewContextMenuStrip_Opening);
+            // 
+            // exportToolStripMenuItem
+            // 
+            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportToolStripMenuItem.Text = "Export";
+            this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearToolStripMenuItem.Text = "Clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -669,6 +697,7 @@ namespace BadmintonCourtAutoBooker
             this.panel1.ResumeLayout(false);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.logListViewContextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -696,7 +725,7 @@ namespace BadmintonCourtAutoBooker
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.ListView logListView;
-        private System.Windows.Forms.CheckBox monitorCheckBox;
+        private System.Windows.Forms.CheckBox useMonitorCheckBox;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.Button stopButton;
         private System.Windows.Forms.Button startButton;
@@ -727,6 +756,9 @@ namespace BadmintonCourtAutoBooker
         private System.Windows.Forms.CheckBox timeSelectCheckBox;
         private System.Windows.Forms.ToolStripMenuItem settingsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem checkWebsiteStatusOnFirstExecutionToolStripMenuItem;
+        private System.Windows.Forms.ContextMenuStrip logListViewContextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
     }
 }
 
