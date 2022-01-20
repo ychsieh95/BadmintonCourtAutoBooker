@@ -718,20 +718,25 @@ namespace BadmintonCourtAutoBooker
              *     only one BackgroungWorker can set the finished flag in the
              *     same time.
              */
-            if (args.UseMonitor)
+            if ((args.MonitorBySingleThread && mutex.WaitOne()) ||
+                !args.MonitorBySingleThread)
             {
-                Log("Finished first booking", logType: LogType.Okay, id: args.Id);
-                if (!args.MonitorBySingleThread)
+                backgroundWorker_Monitor(sender, e, bookingBot);
+            }
+        }
+
+        private void backgroundWorker_Monitor(object sender, DoWorkEventArgs e, BookingBot bookingBot)
+        {
+            BackgroundWrokerArguments args = (BackgroundWrokerArguments)e.Argument;
+            backgroundWorkerPairs.First(backgroundWorkerPair => backgroundWorkerPair.BackgroundWorker == (BackgroundWorker)sender).IsFinished = true;
+
+            if (args.MonitorBySingleThread)
+            {
+                bool isReturned = false;
+                if (!backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
                 {
-                    backgroundWorker_Monitor(sender, e, bookingBot);
-                }
-                else
-                {
-                    if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
-                    {
-                        Log("Monitor by current BackgroungWorker", id: args.Id);
-                        backgroundWorker_Monitor(sender, e, bookingBot);
-                    }
+                    Log("Finished first booking", logType: LogType.Okay, id: args.Id);
+                    isReturned = true;
                 }
             }
 
@@ -850,6 +855,14 @@ namespace BadmintonCourtAutoBooker
 
                 backgroundWorker_Sleep(sender, e, args.MonitorIntervalSeconds * 1000);
             }
+
+            mutex.WaitOne();
+            if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
+            {
+                Log($"Finished to auto-book courts", logType: LogType.Okay);
+                this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
+            }
+            mutex.ReleaseMutex();
         }
 
         private void backgroundWorker_Sleep(object sender, DoWorkEventArgs e, int millisecondsTimeout)
