@@ -722,7 +722,7 @@ namespace BadmintonCourtAutoBooker
             else
             {
                 Log("Finished first booking", logType: LogType.Okay, id: args.Id);
-                if (IsLastBackgroundWorker((BackgroundWorker)sender))
+                if (!IsLastBackgroundWorker((BackgroundWorker)sender))
                 {
                     return;
                 }
