@@ -765,7 +765,7 @@ namespace BadmintonCourtAutoBooker
                 if (((BackgroundWorker)sender).CancellationPending)
                 {
                     e.Cancel = true;
-                    Log($"Cancelled BackgroundWorker (@monitor)", logType: LogType.Info, id: args.Id);
+                    Log($"Cancelled BackgroundWorker", logType: LogType.Info, id: args.Id);
                     return;
                 }
 
