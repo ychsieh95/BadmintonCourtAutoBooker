@@ -848,14 +848,6 @@ namespace BadmintonCourtAutoBooker
 
                 backgroundWorker_Sleep(sender, e, args.MonitorIntervalSeconds * 1000);
             }
-
-            mutex.WaitOne();
-            if (backgroundWorkerPairs.All(backgroundWorkerPair => backgroundWorkerPair.IsFinished))
-            {
-                Log($"Finished to auto-book courts", logType: LogType.Okay);
-                this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
-            }
-            mutex.ReleaseMutex();
         }
 
         private void backgroundWorker_Sleep(object sender, DoWorkEventArgs e, int millisecondsTimeout)
