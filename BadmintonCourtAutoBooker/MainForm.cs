@@ -41,6 +41,8 @@ namespace BadmintonCourtAutoBooker
         private Size toolStripMenuItemImageSize;
         private Size toolStripStatusLabelImageSize;
 
+        private bool cancelByStopButton = false;
+
         private delegate void VoidDelegate();
 
         public MainForm()
@@ -367,6 +369,7 @@ namespace BadmintonCourtAutoBooker
 
         private void stopButton_Click(object sender, EventArgs e)
         {
+            cancelByStopButton = true;
             bookingTimer.Enabled = false;
             new System.Threading.Thread(() => CancelBackgroundWorkers()).Start();
         }
@@ -632,7 +635,11 @@ namespace BadmintonCourtAutoBooker
                 else
                 {
                     Log($"Login failed ({loginStatus}), retrying after 3 seconds", logType: LogType.Failed, id: args.Id);
-                    backgroundWorker_Sleep(sender, e, 3000);
+                    backgroundWorker_Sleep(sender, e, 3000, out bool cancellationPending);
+                    if (cancellationPending)
+                    {
+                        return;
+                    }
                 }
             }
 
@@ -736,7 +743,7 @@ namespace BadmintonCourtAutoBooker
             /*
              * Dispose all BackgroundWorker after inished to auto-book courts
              */
-            if (IsLastBackgroundWorker((BackgroundWorker)sender))
+            if (IsLastBackgroundWorker((BackgroundWorker)sender) && !cancelByStopButton)
             {
                 Log($"Finished to auto-book courts", logType: LogType.Okay);
                 this.Invoke((VoidDelegate)(() => { stopButton.PerformClick(); }));
@@ -752,12 +759,13 @@ namespace BadmintonCourtAutoBooker
             (DateTime loginDateTime, DateTime monitorBegin) = (DateTime.Now, DateTime.Now);
             (List<int> monitorTimeCodes, List<int> monitorCourtCodes) = args.MonitorBySingleThread ? (args.MonitorTimeCodes, args.MonitorCourtCodes) : (args.BookingTimeCodes, args.BookingCourtCodes);
             bool serviceTimeRecord = false;
+            bool cancellationPending = false;
             while (true)
             {
                 if (((BackgroundWorker)sender).CancellationPending)
                 {
                     e.Cancel = true;
-                    Log($"Cancelled BackgroundWorker", logType: LogType.Info, id: args.Id);
+                    Log($"Cancelled BackgroundWorker (@monitor)", logType: LogType.Info, id: args.Id);
                     return;
                 }
 
@@ -781,7 +789,7 @@ namespace BadmintonCourtAutoBooker
                         else
                         {
                             Log($"Login failed ({loginStatus}), retrying after 3 seconds", logType: LogType.Failed, id: args.Id);
-                            backgroundWorker_Sleep(sender, e, 3000);
+                            backgroundWorker_Sleep(sender, e, 3000,  out cancellationPending);
                             continue;
                         }
                     }
@@ -846,11 +854,15 @@ namespace BadmintonCourtAutoBooker
                     break;
                 }
 
-                backgroundWorker_Sleep(sender, e, args.MonitorIntervalSeconds * 1000);
+                backgroundWorker_Sleep(sender, e, args.MonitorIntervalSeconds * 1000, out cancellationPending);
+                if (cancellationPending)
+                {
+                    return;
+                }
             }
         }
 
-        private void backgroundWorker_Sleep(object sender, DoWorkEventArgs e, int millisecondsTimeout)
+        private void backgroundWorker_Sleep(object sender, DoWorkEventArgs e, int millisecondsTimeout, out bool cancellationPending)
         {
             BackgroundWrokerArguments args = (BackgroundWrokerArguments)e.Argument;
 
@@ -862,12 +874,13 @@ namespace BadmintonCourtAutoBooker
             {
                 if (((BackgroundWorker)sender).CancellationPending)
                 {
-                    e.Cancel = true;
+                    e.Cancel = cancellationPending = true;
                     Log($"Cancelled BackgroundWorker", logType: LogType.Info, id: args.Id);
                     return;
                 }
                 System.Threading.Thread.SpinWait(10);
             }
+            cancellationPending = false;
         }
 
         private bool IsLastBackgroundWorker(BackgroundWorker backgroundWorker)
@@ -923,6 +936,7 @@ namespace BadmintonCourtAutoBooker
             {
                 mutex.Close();
             }
+            cancelByStopButton = false;
             SetFormControl(true);
         }
 
