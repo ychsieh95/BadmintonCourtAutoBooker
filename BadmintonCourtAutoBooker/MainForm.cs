@@ -110,10 +110,6 @@ namespace BadmintonCourtAutoBooker
             splitContainer1.IsSplitterFixed = true;
             splitContainer1.Cursor = Cursors.Default;
 
-            /* GroupBox of account settings */
-            usernameTextBox.UseSystemPasswordChar = true;
-            passwordTextBox.UseSystemPasswordChar = true;
-
             /* GroupBox of booking settings */
             sportCenterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             sportCenterComboBox.Items.Clear();
@@ -233,6 +229,13 @@ namespace BadmintonCourtAutoBooker
             };
             orderListForm.Show();
         }
+
+        private void usernameTextBox_DoubleClick(object sender, EventArgs e) =>
+            usernameTextBox.UseSystemPasswordChar = !usernameTextBox.UseSystemPasswordChar;
+
+        private void passwordTextBox_DoubleClick(object sender, EventArgs e) =>
+            passwordTextBox.UseSystemPasswordChar = !passwordTextBox.UseSystemPasswordChar;
+
 
         #region GroupBox of Account Settings
 
@@ -1052,6 +1055,8 @@ namespace BadmintonCourtAutoBooker
             /* Account */
             iniManager.WriteIniFile("Account", "Username", usernameTextBox.Text.Encrypt(cryptoKey) ?? "");
             iniManager.WriteIniFile("Account", "Password", passwordTextBox.Text.Encrypt(cryptoKey) ?? "");
+            iniManager.WriteIniFile("Account", "UsernamePassChar", usernameTextBox.UseSystemPasswordChar);
+            iniManager.WriteIniFile("Account", "PasswordPassChar", passwordTextBox.UseSystemPasswordChar);
             /* Booking */
             iniManager.WriteIniFile("Booking", "SportCenterIndex", sportCenterComboBox.SelectedIndex);
             iniManager.WriteIniFile("Booking", "MultiThread", bookingByMultiThreadCheckBox.Checked);
@@ -1077,6 +1082,8 @@ namespace BadmintonCourtAutoBooker
             /* Account */
             usernameTextBox.Text = iniManager.ReadIniFile("Account", "Username", "").Decrypt(cryptoKey) ?? "";
             passwordTextBox.Text = iniManager.ReadIniFile("Account", "Password", "").Decrypt(cryptoKey) ?? "";
+            usernameTextBox.UseSystemPasswordChar = bool.Parse(iniManager.ReadIniFile("Account", "UsernamePassChar", "true"));
+            passwordTextBox.UseSystemPasswordChar = bool.Parse(iniManager.ReadIniFile("Account", "PasswordPassChar", "true"));
             /* Booking */
             sportCenterComboBox.SelectedIndex = int.Parse(iniManager.ReadIniFile("Booking", "SportCenterIndex", "0"));
             bookingByMultiThreadCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Booking", "MultiThread", "true"));

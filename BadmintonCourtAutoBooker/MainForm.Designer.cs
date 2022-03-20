@@ -135,6 +135,7 @@ namespace BadmintonCourtAutoBooker
             this.passwordTextBox.Name = "passwordTextBox";
             this.passwordTextBox.Size = new System.Drawing.Size(161, 23);
             this.passwordTextBox.TabIndex = 3;
+            this.passwordTextBox.DoubleClick += new System.EventHandler(this.passwordTextBox_DoubleClick);
             // 
             // label2
             // 
@@ -153,6 +154,7 @@ namespace BadmintonCourtAutoBooker
             this.usernameTextBox.Name = "usernameTextBox";
             this.usernameTextBox.Size = new System.Drawing.Size(161, 23);
             this.usernameTextBox.TabIndex = 1;
+            this.usernameTextBox.DoubleClick += new System.EventHandler(this.usernameTextBox_DoubleClick);
             // 
             // label1
             // 
@@ -347,7 +349,7 @@ namespace BadmintonCourtAutoBooker
             this.timeUnduplicatedCheckBox.AutoSize = true;
             this.timeUnduplicatedCheckBox.Location = new System.Drawing.Point(74, 98);
             this.timeUnduplicatedCheckBox.Name = "timeUnduplicatedCheckBox";
-            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(126, 19);
+            this.timeUnduplicatedCheckBox.Size = new System.Drawing.Size(125, 19);
             this.timeUnduplicatedCheckBox.TabIndex = 6;
             this.timeUnduplicatedCheckBox.Text = "Time unduplicated";
             this.timeUnduplicatedCheckBox.UseVisualStyleBackColor = true;
@@ -481,7 +483,7 @@ namespace BadmintonCourtAutoBooker
             // versionToolStripStatusLabel
             // 
             this.versionToolStripStatusLabel.Name = "versionToolStripStatusLabel";
-            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(152, 17);
+            this.versionToolStripStatusLabel.Size = new System.Drawing.Size(151, 17);
             this.versionToolStripStatusLabel.Text = "versionToolStripStatusLabel";
             // 
             // splitContainer1
@@ -563,7 +565,7 @@ namespace BadmintonCourtAutoBooker
             this.useTelegramToNotifyCheckBox.Location = new System.Drawing.Point(3, 19);
             this.useTelegramToNotifyCheckBox.Margin = new System.Windows.Forms.Padding(2);
             this.useTelegramToNotifyCheckBox.Name = "useTelegramToNotifyCheckBox";
-            this.useTelegramToNotifyCheckBox.Size = new System.Drawing.Size(147, 19);
+            this.useTelegramToNotifyCheckBox.Size = new System.Drawing.Size(146, 19);
             this.useTelegramToNotifyCheckBox.TabIndex = 0;
             this.useTelegramToNotifyCheckBox.Text = "Use Telegram to Notify";
             this.useTelegramToNotifyCheckBox.UseVisualStyleBackColor = true;
@@ -585,7 +587,7 @@ namespace BadmintonCourtAutoBooker
             this.label12.Location = new System.Drawing.Point(5, 48);
             this.label12.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(60, 15);
+            this.label12.Size = new System.Drawing.Size(59, 15);
             this.label12.TabIndex = 1;
             this.label12.Text = "BotToken:";
             // 
@@ -620,7 +622,7 @@ namespace BadmintonCourtAutoBooker
             // checkWebsiteStatusOnFirstExecutionToolStripMenuItem
             // 
             this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Name = "checkWebsiteStatusOnFirstExecutionToolStripMenuItem";
-            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Size = new System.Drawing.Size(283, 22);
+            this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
             this.checkWebsiteStatusOnFirstExecutionToolStripMenuItem.Text = "Check Website Status on First Execution";
             // 
             // viewToolStripMenuItem
@@ -644,20 +646,20 @@ namespace BadmintonCourtAutoBooker
             this.exportToolStripMenuItem,
             this.clearToolStripMenuItem});
             this.logListViewContextMenuStrip.Name = "logListViewContextMenuStrip";
-            this.logListViewContextMenuStrip.Size = new System.Drawing.Size(181, 70);
+            this.logListViewContextMenuStrip.Size = new System.Drawing.Size(109, 48);
             this.logListViewContextMenuStrip.Opening += new System.ComponentModel.CancelEventHandler(this.logListViewContextMenuStrip_Opening);
             // 
             // exportToolStripMenuItem
             // 
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportToolStripMenuItem.Size = new System.Drawing.Size(108, 22);
             this.exportToolStripMenuItem.Text = "Export";
             this.exportToolStripMenuItem.Click += new System.EventHandler(this.exportToolStripMenuItem_Click);
             // 
             // clearToolStripMenuItem
             // 
             this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(108, 22);
             this.clearToolStripMenuItem.Text = "Clear";
             this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
