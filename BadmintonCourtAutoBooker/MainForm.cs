@@ -701,20 +701,29 @@ namespace BadmintonCourtAutoBooker
                 foreach (int courtCode in args.BookingCourtCodes)
                 {
                     string currentCourtName = currentSportCenter.Courts.First(court => court.Value == courtCode).Key;
+                    BookingMessageGenerator bookingMessageGenerator = new BookingMessageGenerator()
+                    {
+                        SportCenterName = currentSportCenter.Name,
+                        CourtName = currentCourtName,
+                        CourtCode = courtCode,
+                        DestDate = args.DestDate,
+                        DestTime = timeCode,
+                        Username = args.Username.Substring(5) + new string('*', args.Username.Length - 5)
+                    };
                     if (bookingBot.BookCourt(courtCode, timeCode, args.DestDate))
                     {
-                        Log($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})", logType: LogType.Okay, id: args.Id);
+                        Log(bookingMessageGenerator.GetMessage(bookingState: true), logType: LogType.Okay, id: args.Id);
                         if (args.UseTelegramToNotify)
                         {
                             new Task(() =>
                             {
-                                _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})");
+                                _ = args.TelegramBot.SendMessageByTelegramBotAsync(bookingMessageGenerator.GetMessage(bookingState: true));
                             }).Start();
                         }
                     }
                     else
                     {
-                        Log($"Failed to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})", logType: LogType.Failed, id: args.Id);
+                        Log(bookingMessageGenerator.GetMessage(bookingState: false), logType: LogType.Failed, id: args.Id);
                     }
                 }
             }
@@ -829,21 +838,30 @@ namespace BadmintonCourtAutoBooker
                             foreach (Court court in availableCourts)
                             {
                                 string currentCourtName = currentSportCenter.Courts.First(courtPair => courtPair.Value == court.Id).Key;
+                                BookingMessageGenerator bookingMessageGenerator = new BookingMessageGenerator()
+                                {
+                                    SportCenterName = currentSportCenter.Name,
+                                    CourtName = currentCourtName,
+                                    CourtCode = court.Id,
+                                    DestDate = court.Date,
+                                    DestTime = court.TimeCode,
+                                    Username = args.Username.Substring(5) + new string('*', args.Username.Length - 5)
+                                };
                                 if (bookingBot.BookCourt(court))
                                 {
-                                    Log($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})", logType: LogType.Okay, id: args.Id);
+                                    Log(bookingMessageGenerator.GetMessage(bookingState: true), logType: LogType.Okay, id: args.Id);
                                     courtBookingRecord.Add(court.TimeCode);
                                     if (args.UseTelegramToNotify)
                                     {
                                         new Task(() =>
                                         {
-                                            _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})");
+                                            _ = args.TelegramBot.SendMessageByTelegramBotAsync(bookingMessageGenerator.GetMessage(bookingState: true));
                                         }).Start();
                                     }
                                 }
                                 else
                                 {
-                                    Log($"Failed to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})", logType: LogType.Failed, id: args.Id);
+                                    Log(bookingMessageGenerator.GetMessage(bookingState: false), logType: LogType.Failed, id: args.Id);
                                 }
                             }
                         }
