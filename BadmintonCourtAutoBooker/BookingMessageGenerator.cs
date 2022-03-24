@@ -20,6 +20,6 @@ namespace BadmintonCourtAutoBooker
             $"{(bookingState ? "Success" : "Failed")} to book the court {SportCenterName} {CourtName}({CourtCode}) (" +
             $"date_code={DestDate:yyyy-MM-dd}, " +
             $"time_code={DestTime}), " +
-            $"account={Username.Substring(5)}{new string('*', Username.Length - 5)})";
+            $"account={Username.Substring(0, 5)}{new string('*', Username.Length - 5)})";
     }
 }
