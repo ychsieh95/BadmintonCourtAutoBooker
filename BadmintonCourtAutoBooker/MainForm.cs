@@ -708,7 +708,7 @@ namespace BadmintonCourtAutoBooker
                         CourtCode = courtCode,
                         DestDate = args.DestDate,
                         DestTime = timeCode,
-                        Username = args.Username.Substring(5) + new string('*', args.Username.Length - 5)
+                        Username = args.Username
                     };
                     if (bookingBot.BookCourt(courtCode, timeCode, args.DestDate))
                     {
@@ -845,7 +845,7 @@ namespace BadmintonCourtAutoBooker
                                     CourtCode = court.Id,
                                     DestDate = court.Date,
                                     DestTime = court.TimeCode,
-                                    Username = args.Username.Substring(5) + new string('*', args.Username.Length - 5)
+                                    Username = args.Username
                                 };
                                 if (bookingBot.BookCourt(court))
                                 {
