@@ -1,4 +1,4 @@
-﻿namespace BadmintonCourtAutoBooker
+namespace BadmintonCourtAutoBooker
 {
     partial class LoginForm
     {

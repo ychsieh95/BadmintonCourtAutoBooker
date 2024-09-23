@@ -4,6 +4,8 @@ namespace BadmintonCourtAutoBooker
 {
     internal class Order
     {
+        public OrderType OrderType{ get; set; }
+
         public DateTime Date { get; set; }
 
         public string OrderId { get; set; }
@@ -43,6 +45,14 @@ namespace BadmintonCourtAutoBooker
         public string PhoneNumber { get; set; }
 
         public string Lessee { get; set; }
+
+        public string Qualifications { get; set; }
+    }
+
+    public enum OrderType
+    {
+        租用,
+        登記
     }
 
     public enum DayOfWeek
@@ -62,6 +72,7 @@ namespace BadmintonCourtAutoBooker
         繳費,
         未繳費,
         取消,
-        退費
+        退費,
+        登記
     }
 }

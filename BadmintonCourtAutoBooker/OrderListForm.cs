@@ -97,7 +97,7 @@ namespace BadmintonCourtAutoBooker
             new System.Threading.Thread(() =>
             {
                 orderListItems = bookingBot.GetOrderList(beginDate: beginDate, endDate: endDate, orderId: orderId);
-                orderListItems = orderListItems.FindAll(order => orderBeginDate <= order.OrderDate && order.OrderDate <= orderEndDate);
+                orderListItems = orderListItems.FindAll(order => (order.Status != OrderStatus.登記 && orderBeginDate <= order.OrderDate && order.OrderDate <= orderEndDate) || order.Status == OrderStatus.登記);
                 if (orderStatus != OrderStatus.所有)
                 {
                     orderListItems = orderListItems.FindAll(order => order.Status == orderStatus);
@@ -119,6 +119,7 @@ namespace BadmintonCourtAutoBooker
                 switch (selectOrder.Status)
                 {
                     case OrderStatus.繳費:
+                    case OrderStatus.未繳費:
                         cancelToolStripMenuItem.Enabled = true;
                         break;
                     default:
@@ -141,7 +142,7 @@ namespace BadmintonCourtAutoBooker
                 }
                 else
                 {
-                    Order order = bookingBot.GetOrder(id: selectOrder.ViewOnClickDict["ID"], orderId: selectOrder.OrderId);
+                    Order order = bookingBot.GetOrder(id: selectOrder.ViewOnClickDict["ID"], kind: selectOrder.ViewOnClickDict["KIND"], orderId: selectOrder.OrderId);
                     clickedItem.SubItems[5].Text = order.CourtName;
                 }
             }
@@ -154,7 +155,7 @@ namespace BadmintonCourtAutoBooker
                 OrderListItem selectOrder = orderListItems.First(order => order.OrderId == orderListView.SelectedItems[0].SubItems[2].Text);
                 new OrderDetailForm()
                 {
-                    Order = bookingBot.GetOrder(id: selectOrder.ViewOnClickDict["ID"], orderId: selectOrder.OrderId)
+                    Order = bookingBot.GetOrder(id: selectOrder.ViewOnClickDict["ID"], kind: selectOrder.ViewOnClickDict["KIND"], orderId: selectOrder.OrderId)
                 }.ShowDialog();
             }
         }
@@ -204,7 +205,7 @@ namespace BadmintonCourtAutoBooker
                             order.ReceiptId,
                             order.ProductName,
                             order.CourtName,
-                            order.Price.ToString(),
+                            order.Price >= 0 ? order.Price.ToString() : "",
                             order.IsOrderDate ? order.OrderDate.ToString("yyyy-MM-dd") : order.OrderDateStr,
                             order.IsOrderTime ? order.OrderTime.ToString("00") : order.OrderTimeStr,
                             order.Status.ToString(),
@@ -224,6 +225,9 @@ namespace BadmintonCourtAutoBooker
                         case OrderStatus.未繳費:
                         case OrderStatus.取消:
                             listViewItem.SubItems[9].ForeColor = Color.Red;
+                            break;
+                        case OrderStatus.登記:
+                            listViewItem.SubItems[9].ForeColor = Color.Blue;
                             break;
                     }
                     orderListView.Items.Add(listViewItem);

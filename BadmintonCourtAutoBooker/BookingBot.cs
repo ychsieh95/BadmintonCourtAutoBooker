@@ -314,13 +314,19 @@ namespace BadmintonCourtAutoBooker
                             OrderId = trNode.SelectSingleNode("./td[2]").InnerText,
                             ReceiptId = trNode.SelectSingleNode("./td[3]").InnerText,
                             ProductName = trNode.SelectSingleNode("./td[4]").InnerText,
-                            Price = decimal.Parse(trNode.SelectSingleNode("./td[5]").InnerText),
+                            Price = -1,
+                            //Price = decimal.Parse(trNode.SelectSingleNode("./td[5]").InnerText),
                             OrderDateStr = trNode.SelectSingleNode("./td[6]").InnerText,
                             OrderTimeStr = trNode.SelectSingleNode("./td[7]").InnerText,
                             Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), trNode.SelectSingleNode("./td[8]").InnerText),
                             Remark = trNode.SelectSingleNode("./td[9]").InnerText,
                             CourtName = ""
                         };
+
+                        if (decimal.TryParse(trNode.SelectSingleNode("./td[5]").InnerText, out decimal price))
+                        {
+                            order.Price = price;
+                        }
 
                         if (!string.IsNullOrEmpty(order.ReceiptId))
                         {
@@ -401,7 +407,7 @@ namespace BadmintonCourtAutoBooker
             }
         }
 
-        public Order GetOrder(string id, string orderId)
+        public Order GetOrder(string id, string kind, string orderId)
         {
             RestRequest restRequest = new RestRequest(moduleName);
             restRequest.AddQueryParameter("module", "member");
@@ -413,63 +419,102 @@ namespace BadmintonCourtAutoBooker
             restRequest.AddQueryParameter("D", "");
             restRequest.AddQueryParameter("tFlag", "1"); // { 1: view, 2: cancel }
             restRequest.AddQueryParameter("ID", id);
-            restRequest.AddQueryParameter("KIND", "1");
+            restRequest.AddQueryParameter("KIND", kind);
             restRequest.AddQueryParameter("RNO", orderId);
 
             string respContent = restClient.Get(restRequest).Content.Replace("\r", "").Replace("\n", "");
             HtmlDocument htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(respContent);
 
-            HtmlNode tableNode = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_PanelShow2']/table[1]/tr[2]/td[1]/table[1]");
-            if (tableNode == null)
+            HtmlNode tableNode;
+            Order order;
+            switch (kind)
             {
-                return null;
+                case "3":
+                    tableNode = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_PanelShow5']/table[1]/tr[2]/td[1]/table[1]");
+                    if (tableNode == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        order = new Order()
+                        {
+                            Date = DateTime.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_CDate3']").InnerText),
+                            OrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_No3']").InnerText,
+                            MemberName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MName3']").InnerText,
+                            MemberId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MIDNo3']").InnerText,
+                            OrderDateStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Date3']").InnerText,
+                            CourtName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_PName3']").InnerText,
+                            DayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week3']").InnerText),
+                            OrderTimeStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week3']").InnerText,
+                            Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_FeeStatus31']").InnerText),
+                            Qualifications = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_FeeStatus32']").InnerText
+                        };
+                    }
+                    break;
+                default:
+                    tableNode = htmlDocument.DocumentNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_PanelShow2']/table[1]/tr[2]/td[1]/table[1]");
+                    if (tableNode == null)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        order = new Order()
+                        {
+                            Date = DateTime.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Date']").InnerText),
+                            OrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_No']").InnerText,
+                            SalesOrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_SaleNo']").InnerText,
+                            ReceiptId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Invoice']").InnerText,
+                            MemberName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MName']").InnerText,
+                            MemberId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MIDNo']").InnerText,
+                            ProductName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_PName']").InnerText,
+                            Price = decimal.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Price']").InnerText),
+                            OrderDateStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_RDate']").InnerText,
+                            OrderTimeStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Time']").InnerText,
+                            DayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText),
+                            DayOfWeekStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText,
+                            Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Fee']").InnerText),
+                            CourtName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Location']").InnerText,
+                            PhoneNumber = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Tel']").InnerText,
+                            Lessee = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_People']").InnerText
+                        };
+                    }
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(order.OrderDateStr))
+            {
+                Match match = new Regex(@"^\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderDateStr);
+                if (match.Success)
+                {
+                    order.IsOrderDate = true;
+                    order.OrderDate = DateTime.Parse(match.Groups[0].Value);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(order.OrderTimeStr))
+            {
+                Match match = new Regex(@"^(\d{2}).+(\d{2})$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderTimeStr);
+                if (match.Success &&
+                    int.TryParse(match.Groups[1].Value, out int beginTime) && ($"{beginTime}~{beginTime + 1}" == order.OrderTimeStr))
+                {
+                    order.IsOrderTime = true;
+                    order.OrderTime = int.Parse(match.Groups[1].Value);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(order.Qualifications))
+            {
+                order.OrderType = OrderType.登記;
             }
             else
             {
-                Order order = new Order()
-                {
-                    Date = DateTime.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Date']").InnerText),
-                    OrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_No']").InnerText,
-                    SalesOrderId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_SaleNo']").InnerText,
-                    ReceiptId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Invoice']").InnerText,
-                    MemberName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MName']").InnerText,
-                    MemberId = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_MIDNo']").InnerText,
-                    ProductName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_PName']").InnerText,
-                    Price = decimal.Parse(tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Price']").InnerText),
-                    OrderDateStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_RDate']").InnerText,
-                    OrderTimeStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Time']").InnerText,
-                    DayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText),
-                    DayOfWeekStr = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Week']").InnerText,
-                    Status = (OrderStatus)Enum.Parse(typeof(OrderStatus), tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Fee']").InnerText),
-                    CourtName = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Location']").InnerText,
-                    PhoneNumber = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_Tel']").InnerText,
-                    Lessee = tableNode.SelectSingleNode("//*[@id='ContentPlaceHolder1_show_People']").InnerText
-                };
-
-                if (!string.IsNullOrEmpty(order.OrderDateStr))
-                {
-                    Match match = new Regex(@"^\d{4}-\d{2}-\d{2}$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderDateStr);
-                    if (match.Success)
-                    {
-                        order.IsOrderDate = true;
-                        order.OrderDate = DateTime.Parse(match.Groups[0].Value);
-                    }
-                }
-
-                if (!string.IsNullOrEmpty(order.OrderTimeStr))
-                {
-                    Match match = new Regex(@"^(\d{2}).+(\d{2})$", RegexOptions.Compiled | RegexOptions.IgnoreCase).Match(order.OrderTimeStr);
-                    if (match.Success &&
-                        int.TryParse(match.Groups[1].Value, out int beginTime) && ($"{beginTime}~{beginTime + 1}" == order.OrderTimeStr))
-                    {
-                        order.IsOrderTime = true;
-                        order.OrderTime = int.Parse(match.Groups[1].Value);
-                    }
-                }
-
-                return order;
+                order.OrderType = OrderType.租用;
             }
+
+            return order;
         }
 
         public bool CancelOrder(string id, string orderId)

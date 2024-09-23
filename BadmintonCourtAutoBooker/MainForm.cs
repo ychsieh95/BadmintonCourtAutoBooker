@@ -94,6 +94,9 @@ namespace BadmintonCourtAutoBooker
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            DateTime dtNext1Day = DateTime.Now.AddDays(1);
+            DateTime dtNextSelectDay = DateTime.Now;
+
             /* Initial variables */
             toolStripMenuItemImageSize = new Size(viewToolStripMenuItem.Size.Height, viewToolStripMenuItem.Size.Height);
             toolStripStatusLabelImageSize = new Size(versionToolStripStatusLabel.Size.Height, versionToolStripStatusLabel.Size.Height);
@@ -122,10 +125,6 @@ namespace BadmintonCourtAutoBooker
                 sportCenterComboBox.Items.Add(sportCenter.Name);
             }
 
-            dateDateTimePicker.Format = DateTimePickerFormat.Custom;
-            dateDateTimePicker.CustomFormat = "yyyy-MM-dd (dddd)";
-            dateDateTimePicker.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 0, 0, 0);
-
             timeCheckedListBox.Items.Clear();
             for (int i = 6; i <= 21; i++)
             {
@@ -137,7 +136,7 @@ namespace BadmintonCourtAutoBooker
             /* GroupBox of monitor settings */
             untilDateTimePicker.Format = DateTimePickerFormat.Custom;
             untilDateTimePicker.CustomFormat = "yyyy-MM-dd HH:mm:ss";
-            untilDateTimePicker.Value = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day + 1, 0, 30, 0);
+            untilDateTimePicker.Value = new DateTime(dtNext1Day.Year, dtNext1Day.Month, dtNext1Day.Day, 0, 30, 0);
 
             intervalDateTimePicker.Format = DateTimePickerFormat.Custom;
             intervalDateTimePicker.CustomFormat = "HH:mm:ss";
@@ -201,6 +200,12 @@ namespace BadmintonCourtAutoBooker
             this.SetAttributes(text: "BadmintonCourtAutoBooker", icon: Properties.Resources.badminton_512x512, minimizeBox: true);
 
             LoadConfigs();
+
+            // After loading configs
+            dtNextSelectDay = dtNextSelectDay.AddDays(currentSportCenter.DayDiff);
+            dateDateTimePicker.Format = DateTimePickerFormat.Custom;
+            dateDateTimePicker.CustomFormat = "yyyy-MM-dd (dddd)";
+            dateDateTimePicker.Value = new DateTime(dtNextSelectDay.Year, dtNextSelectDay.Month, dtNextSelectDay.Day + 1, 0, 0, 0);
         }
 
         private void MainForm_Shown(object sender, EventArgs e)
@@ -259,6 +264,12 @@ namespace BadmintonCourtAutoBooker
                 SetFormControl(true);
             }).Start();
         }
+
+        private void usernameTextBox_MouseDoubleClick(object sender, MouseEventArgs e) =>
+            usernameTextBox.UseSystemPasswordChar = !usernameTextBox.UseSystemPasswordChar;
+
+        private void passwordTextBox_MouseDoubleClick(object sender, MouseEventArgs e) =>
+            passwordTextBox.UseSystemPasswordChar = !passwordTextBox.UseSystemPasswordChar;
 
         #endregion
 
@@ -398,18 +409,11 @@ namespace BadmintonCourtAutoBooker
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 string logMessage = "";
-
-                char delimitChar = (char)0;
-                switch (saveFileDialog.FilterIndex)
+                char delimitChar = saveFileDialog.FilterIndex switch
                 {
-                    case 1:
-                        delimitChar = ',';
-                        break;
-                    default:
-                        delimitChar = '\t';
-                        break;
-                }
-
+                    1 => ',',
+                    _ => '\t',
+                };
                 for (int i = 0; i < logListView.Items.Count; i++)
                 {
                     for (int j = 0; j < logListView.Items[i].SubItems.Count; j++)
@@ -434,7 +438,7 @@ namespace BadmintonCourtAutoBooker
                         }
                         break;
                     case DialogResult.No:
-                        System.Diagnostics.Process.Start("explorer.exe", saveFileDialog.FileName.Substring(0, saveFileDialog.FileName.LastIndexOf('\\') + 1));
+                        System.Diagnostics.Process.Start("explorer.exe", saveFileDialog.FileName[..(saveFileDialog.FileName.LastIndexOf('\\') + 1)]);
                         break;
                     case DialogResult.Cancel:
                         break;
@@ -608,6 +612,16 @@ namespace BadmintonCourtAutoBooker
             }
         }
 
+        #region Group of Notification Settings
+
+        private void botTokenTextBox_MouseDoubleClick(object sender, MouseEventArgs e) =>
+            botTokenTextBox.UseSystemPasswordChar = !botTokenTextBox.UseSystemPasswordChar;
+
+        private void channelIdTextBox_MouseDoubleClick(object sender, MouseEventArgs e) =>
+            channelIdTextBox.UseSystemPasswordChar = !channelIdTextBox.UseSystemPasswordChar;
+
+        #endregion
+
         #region BackgroungWorker
 
         private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -722,21 +736,24 @@ namespace BadmintonCourtAutoBooker
              *     only one BackgroungWorker can set the finished flag in the
              *     same time.
              */
-            if (!args.MonitorBySingleThread)
+            if (args.UseMonitor)
             {
-                backgroundWorker_Monitor(sender, e, bookingBot);
-            }
-            else
-            {
-                Log("Finished first booking", logType: LogType.Okay, id: args.Id);
-                if (!IsLastBackgroundWorker((BackgroundWorker)sender))
+                if (!args.MonitorBySingleThread)
                 {
-                    return;
+                    backgroundWorker_Monitor(sender, e, bookingBot);
                 }
                 else
                 {
-                    Log("Monitor by current BackgroungWorker", id: args.Id);
-                    backgroundWorker_Monitor(sender, e, bookingBot);
+                    Log("Finished first booking", logType: LogType.Okay, id: args.Id);
+                    if (!IsLastBackgroundWorker((BackgroundWorker)sender))
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        Log("Monitor by current BackgroungWorker", id: args.Id);
+                        backgroundWorker_Monitor(sender, e, bookingBot);
+                    }
                 }
             }
 

@@ -35,6 +35,7 @@ namespace BadmintonCourtAutoBooker
 
             usernameTextBox.SetWaterMark("[Username]");
             passwordTextBox.SetWaterMark("[Password]");
+            this.KeyPreview = true;
             this.SetAttributes(text: "Login", icon: Properties.Resources.badminton_512x512);
         }
 
@@ -83,6 +84,16 @@ namespace BadmintonCourtAutoBooker
             {
                 panel1.Enabled = status;
             }
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Enter)
+            {
+                loginButton.PerformClick();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }
