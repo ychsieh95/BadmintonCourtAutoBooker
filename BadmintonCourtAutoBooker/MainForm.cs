@@ -113,10 +113,6 @@ namespace BadmintonCourtAutoBooker
             splitContainer1.IsSplitterFixed = true;
             splitContainer1.Cursor = Cursors.Default;
 
-            /* GroupBox of account settings */
-            usernameTextBox.UseSystemPasswordChar = true;
-            passwordTextBox.UseSystemPasswordChar = true;
-
             /* GroupBox of booking settings */
             sportCenterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
             sportCenterComboBox.Items.Clear();
@@ -238,6 +234,13 @@ namespace BadmintonCourtAutoBooker
             };
             orderListForm.Show();
         }
+
+        private void usernameTextBox_DoubleClick(object sender, EventArgs e) =>
+            usernameTextBox.UseSystemPasswordChar = !usernameTextBox.UseSystemPasswordChar;
+
+        private void passwordTextBox_DoubleClick(object sender, EventArgs e) =>
+            passwordTextBox.UseSystemPasswordChar = !passwordTextBox.UseSystemPasswordChar;
+
 
         #region GroupBox of Account Settings
 
@@ -712,20 +715,29 @@ namespace BadmintonCourtAutoBooker
                 foreach (int courtCode in args.BookingCourtCodes)
                 {
                     string currentCourtName = currentSportCenter.Courts.First(court => court.Value == courtCode).Key;
+                    BookingMessageGenerator bookingMessageGenerator = new BookingMessageGenerator()
+                    {
+                        SportCenterName = currentSportCenter.Name,
+                        CourtName = currentCourtName,
+                        CourtCode = courtCode,
+                        DestDate = args.DestDate,
+                        DestTime = timeCode,
+                        Username = args.Username
+                    };
                     if (bookingBot.BookCourt(courtCode, timeCode, args.DestDate))
                     {
-                        Log($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})", logType: LogType.Okay, id: args.Id);
+                        Log(bookingMessageGenerator.GetMessage(bookingState: true), logType: LogType.Okay, id: args.Id);
                         if (args.UseTelegramToNotify)
                         {
                             new Task(() =>
                             {
-                                _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})");
+                                _ = args.TelegramBot.SendMessageByTelegramBotAsync(bookingMessageGenerator.GetMessage(bookingState: true));
                             }).Start();
                         }
                     }
                     else
                     {
-                        Log($"Failed to book court {currentCourtName}({courtCode}) (date_code={args.DestDate:yyyy-MM-dd}, time_code={timeCode})", logType: LogType.Failed, id: args.Id);
+                        Log(bookingMessageGenerator.GetMessage(bookingState: false), logType: LogType.Failed, id: args.Id);
                     }
                 }
             }
@@ -843,21 +855,30 @@ namespace BadmintonCourtAutoBooker
                             foreach (Court court in availableCourts)
                             {
                                 string currentCourtName = currentSportCenter.Courts.First(courtPair => courtPair.Value == court.Id).Key;
+                                BookingMessageGenerator bookingMessageGenerator = new BookingMessageGenerator()
+                                {
+                                    SportCenterName = currentSportCenter.Name,
+                                    CourtName = currentCourtName,
+                                    CourtCode = court.Id,
+                                    DestDate = court.Date,
+                                    DestTime = court.TimeCode,
+                                    Username = args.Username
+                                };
                                 if (bookingBot.BookCourt(court))
                                 {
-                                    Log($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})", logType: LogType.Okay, id: args.Id);
+                                    Log(bookingMessageGenerator.GetMessage(bookingState: true), logType: LogType.Okay, id: args.Id);
                                     courtBookingRecord.Add(court.TimeCode);
                                     if (args.UseTelegramToNotify)
                                     {
                                         new Task(() =>
                                         {
-                                            _ = args.TelegramBot.SendMessageByTelegramBotAsync($"Success to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})");
+                                            _ = args.TelegramBot.SendMessageByTelegramBotAsync(bookingMessageGenerator.GetMessage(bookingState: true));
                                         }).Start();
                                     }
                                 }
                                 else
                                 {
-                                    Log($"Failed to book court {currentCourtName}({court.Id}) (date_code={court.Date:yyyy-MM-dd}, time_code={court.TimeCode})", logType: LogType.Failed, id: args.Id);
+                                    Log(bookingMessageGenerator.GetMessage(bookingState: false), logType: LogType.Failed, id: args.Id);
                                 }
                             }
                         }
@@ -1069,6 +1090,8 @@ namespace BadmintonCourtAutoBooker
             /* Account */
             iniManager.WriteIniFile("Account", "Username", usernameTextBox.Text.Encrypt(cryptoKey) ?? "");
             iniManager.WriteIniFile("Account", "Password", passwordTextBox.Text.Encrypt(cryptoKey) ?? "");
+            iniManager.WriteIniFile("Account", "UsernamePassChar", usernameTextBox.UseSystemPasswordChar);
+            iniManager.WriteIniFile("Account", "PasswordPassChar", passwordTextBox.UseSystemPasswordChar);
             /* Booking */
             iniManager.WriteIniFile("Booking", "SportCenterIndex", sportCenterComboBox.SelectedIndex);
             iniManager.WriteIniFile("Booking", "MultiThread", bookingByMultiThreadCheckBox.Checked);
@@ -1094,6 +1117,8 @@ namespace BadmintonCourtAutoBooker
             /* Account */
             usernameTextBox.Text = iniManager.ReadIniFile("Account", "Username", "").Decrypt(cryptoKey) ?? "";
             passwordTextBox.Text = iniManager.ReadIniFile("Account", "Password", "").Decrypt(cryptoKey) ?? "";
+            usernameTextBox.UseSystemPasswordChar = bool.Parse(iniManager.ReadIniFile("Account", "UsernamePassChar", "true"));
+            passwordTextBox.UseSystemPasswordChar = bool.Parse(iniManager.ReadIniFile("Account", "PasswordPassChar", "true"));
             /* Booking */
             sportCenterComboBox.SelectedIndex = int.Parse(iniManager.ReadIniFile("Booking", "SportCenterIndex", "0"));
             bookingByMultiThreadCheckBox.Checked = bool.Parse(iniManager.ReadIniFile("Booking", "MultiThread", "true"));
